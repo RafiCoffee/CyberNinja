@@ -6,7 +6,6 @@ public class PlayerController2D : MonoBehaviour
 {
     Vector2 movement;
     Vector2 movementInput;
-    Vector2 dashInput;
     Vector2 wallJump;
     public float movementSpeed = 30f;
     public float jumpForce = 8f;
@@ -33,8 +32,14 @@ public class PlayerController2D : MonoBehaviour
         {
             movementInput.x = Input.GetAxis("Horizontal");
 
-            dashInput.x = Input.GetAxisRaw("Horizontal");
-            dashInput.y = Input.GetAxisRaw("Vertical");
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                movementSpeed = 40f;
+            }
+            else
+            {
+                movementSpeed = 30f;
+            }
 
             movement = movementInput * movementSpeed * Time.deltaTime;
 
@@ -67,7 +72,7 @@ public class PlayerController2D : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
-                playerRb2D.velocity = dashInput * 10;
+                playerRb2D.velocity = movementInput * 10;
             }
         }
 

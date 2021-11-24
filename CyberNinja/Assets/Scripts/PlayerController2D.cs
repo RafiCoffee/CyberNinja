@@ -8,21 +8,25 @@ public class PlayerController2D : MonoBehaviour
     Vector2 movementInput;
     Vector2 dashInput;
     Vector2 attackInput;
+    Vector2 blockInput;
     Vector2 wallJump;
     Vector2 collisionRecoil;
 
     public int dashCount = 1;
     private int maxDashCount;
 
-    public float movementSpeed = 30f;
+    public float movementSpeed = 40f;
     public float jumpForce = 8f;
     private float dashTime;
     public float startDashTime;
 
     public bool canMove;
     private bool isOnGround = true;
+    public bool isOnGroundWall = false;
     private bool canWallJump = false;
     private bool isDashing = false;
+    public bool isAttacking = false;
+    public bool isBlocking = false;
 
     private Rigidbody2D playerRb2D;
     private BoxCollider2D playerBc2D;
@@ -43,33 +47,55 @@ public class PlayerController2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (canMove)
+        movementInput.x = Input.GetAxis("Horizontal");
+
+        dashInput.x = Input.GetAxisRaw("Horizontal");
+
+        if (!isAttacking)
         {
-            movementInput.x = Input.GetAxis("Horizontal");
-
-            dashInput.x = Input.GetAxisRaw("Horizontal");
-
             attackInput.x = Input.GetAxisRaw("Horizontal");
             attackInput.y = Input.GetAxisRaw("Vertical");
+        }
+
+        if (!isBlocking)
+        {
+            blockInput.x = Input.GetAxisRaw("Horizontal");
+        }
+
+        if (canMove)
+        {
 
             if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1))
             {
-                transform.GetChild(1).localPosition = attackInput;
+                if (attackInput == Vector2.down)
+                {
+                    transform.GetChild(1).localPosition = attackInput + Vector2.down;
+                }
+                else
+                {
+                    transform.GetChild(1).localPosition = attackInput;
+                }
+            }
+
+            if (blockInput != Vector2.zero)
+            {
+                transform.GetChild(2).localPosition = blockInput / 1.6f;
             }
 
             movement = movementInput * movementSpeed * Time.deltaTime;
 
             if (Input.GetKeyDown(KeyCode.Space) & isOnGround)
             {
-                playerRb2D.gravityScale = 8;
-                playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-                isOnGround = false;
+                    playerRb2D.gravityScale = 8;
+                    isOnGround = false;
+                    playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             }
 
             if (Input.GetKeyDown(KeyCode.LeftShift) && dashInput != Vector2.zero && dashCount != 0)
             {
                 dashCount--;
                 isDashing = true;
+                playerRb2D.velocity = Vector2.zero;
                 playerRb2D.AddForce(dashInput * jumpForce / 1.8f, ForceMode2D.Impulse);
                 playerRb2D.gravityScale = 0.5f;
             }
@@ -85,20 +111,14 @@ public class PlayerController2D : MonoBehaviour
                 }
             }
 
-            RaycastHit2D salto = Physics2D.Raycast(transform.position, Vector2.down, 1.5f, enemy.value);
-
-            if (Input.GetKeyDown(KeyCode.Mouse0))
+            if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
             {
-                if (attackInput == Vector2.down && isOnGround == false && salto)
-                {
-                    playerAnim.SetTrigger("Attack");
-                    playerRb2D.velocity = Vector2.zero;
-                    playerRb2D.AddForce(Vector2.up * jumpForce / 2, ForceMode2D.Impulse);
-                }
-                else
-                {
-                    playerAnim.SetTrigger("Attack");
-                }
+                playerAnim.SetTrigger("Attack");
+            }
+
+            if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
+            {
+                playerAnim.SetTrigger("Block");
             }
         }
 
@@ -110,11 +130,19 @@ public class PlayerController2D : MonoBehaviour
                 canWallJump = false;
             }
         }
+
+        if (isOnGroundWall)
+        {
+            playerRb2D.gravityScale = 8;
+        }
     }
 
     private void FixedUpdate()
     {
-        playerRb2D.transform.Translate(movement);
+        if (canMove)
+        {
+            playerRb2D.transform.Translate(movement);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -126,15 +154,41 @@ public class PlayerController2D : MonoBehaviour
             canWallJump = false;
         }
 
-        if (collision.collider.gameObject.layer == 6)
-        {
-            playerRb2D.velocity = new Vector2(0, 0);
-        }
 
-        if (collision.collider.gameObject.layer == 8)
+        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8)
         {
             collisionRecoil = collision.GetContact(0).normal;
+            if (collisionRecoil == Vector2.up)
+            {
+                if (transform.position.x < collision.collider.transform.position.x)
+                {
+                    collisionRecoil = collisionRecoil + Vector2.left;
+                }
+                else
+                {
+                    collisionRecoil = collisionRecoil + Vector2.right;
+                }
+            }
+            playerRb2D.velocity = Vector2.zero;
+            StartCoroutine(DontMove());
             playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
+        }
+
+        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
+        {
+            collisionRecoil = collision.GetContact(0).normal;
+            playerRb2D.velocity = Vector2.zero;
+            StartCoroutine(DontMove());
+            playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (transform.GetChild(1).gameObject.layer == 9 && collision.gameObject.layer == 8 && attackInput == Vector2.down && isOnGround == false)
+        {
+            playerRb2D.velocity = Vector2.zero;
+            playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
     }
 
@@ -147,12 +201,18 @@ public class PlayerController2D : MonoBehaviour
             canWallJump = false;
         }
 
-        if (collision.collider.gameObject.layer == 6 & isOnGround == false)
+        if (collision.collider.gameObject.layer == 6 && isOnGround == false)
         {
             dashCount = maxDashCount;
             playerRb2D.gravityScale = 1;
             wallJump = collision.GetContact(0).normal / 1.5f + Vector2.up * 1.5f;
             canWallJump = true;
+        }
+
+        if (collision.collider.gameObject.layer == 6 && isOnGround)
+        {
+            playerRb2D.gravityScale = 8;
+            isOnGroundWall = true;
         }
     }
 
@@ -168,6 +228,14 @@ public class PlayerController2D : MonoBehaviour
             playerRb2D.gravityScale = 8;
             movement = movementInput * movementSpeed * Time.deltaTime;
             canWallJump = false;
+            isOnGroundWall = false;
         }
+    }
+
+    IEnumerator DontMove()
+    {
+        canMove = false;
+        yield return new WaitForSeconds(0.4f);
+        canMove = true;
     }
 }

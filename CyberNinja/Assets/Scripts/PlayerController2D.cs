@@ -27,6 +27,8 @@ public class PlayerController2D : MonoBehaviour
     private Rigidbody2D playerRb2D;
     private BoxCollider2D playerBc2D;
     private Animator playerAnim;
+
+    public LayerMask enemy;
     // Start is called before the first frame update
     void Start()
     {
@@ -50,7 +52,10 @@ public class PlayerController2D : MonoBehaviour
             attackInput.x = Input.GetAxisRaw("Horizontal");
             attackInput.y = Input.GetAxisRaw("Vertical");
 
-            transform.GetChild(1).localPosition = attackInput;
+            if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1))
+            {
+                transform.GetChild(1).localPosition = attackInput;
+            }
 
             movement = movementInput * movementSpeed * Time.deltaTime;
 
@@ -80,9 +85,11 @@ public class PlayerController2D : MonoBehaviour
                 }
             }
 
+            RaycastHit2D salto = Physics2D.Raycast(transform.position, Vector2.down, 1.5f, enemy.value);
+
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (attackInput == Vector2.down && isOnGround == false)
+                if (attackInput == Vector2.down && isOnGround == false && salto)
                 {
                     playerAnim.SetTrigger("Attack");
                     playerRb2D.velocity = Vector2.zero;
@@ -127,7 +134,7 @@ public class PlayerController2D : MonoBehaviour
         if (collision.collider.gameObject.layer == 8)
         {
             collisionRecoil = collision.GetContact(0).normal;
-            playerRb2D.AddForce(-collisionRecoil * jumpForce, ForceMode2D.Impulse);
+            playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
         }
     }
 

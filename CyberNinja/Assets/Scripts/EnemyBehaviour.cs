@@ -1,23 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
 
 public class EnemyBehaviour : MonoBehaviour
 {
     Vector2 followPlayer;
 
+    public float coolDown;
+
     private GameObject bullet;
     private GameObject player;
 
-    private BulletPool bulletPoolScript;
+    private Stopwatch timer = new Stopwatch();
+
+    public BulletPool bulletPoolScript;
 
     // Start is called before the first frame update
     void Start()
     {
-        bulletPoolScript = GameObject.Find("EnemyBulletPool").GetComponent<BulletPool>();
-        player = GameObject.Find("Circle");
+        player = GameObject.Find("Player");
 
         followPlayer = player.transform.position - transform.position;
+
+        timer.Start();
     }
 
     // Update is called once per frame
@@ -36,22 +42,26 @@ public class EnemyBehaviour : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, 0, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (timer.ElapsedMilliseconds / 1000 > coolDown)
         {
             Shoot();
+            timer.Restart();
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        
+        if (collision.gameObject.layer == 9)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     void Shoot()
     {
         bullet = bulletPoolScript.GetPooledObject();
-        bullet.transform.position = transform.position;
-        bullet.transform.rotation = bullet.transform.rotation;
+        bullet.transform.position = transform.GetChild(1).GetChild(0).position;
+        bullet.transform.rotation = transform.GetChild(1).GetChild(0).rotation;
         bullet.SetActive(true);
     }
 }

@@ -7,10 +7,12 @@ public class Bullet : MonoBehaviour
 
     public int speed;
 
+    private PlayerController2D playerScript;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerScript = GameObject.Find("Player").GetComponent<PlayerController2D>();
     }
 
     // Update is called once per frame
@@ -31,7 +33,14 @@ public class Bullet : MonoBehaviour
     {
         if (collision.gameObject.layer == 10)
         {
-            gameObject.SetActive(false);
+            if (playerScript.canReturn)
+            {
+                transform.parent.parent.gameObject.SetActive(false);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

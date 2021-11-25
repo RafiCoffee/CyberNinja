@@ -19,6 +19,7 @@ public class PlayerController2D : MonoBehaviour
     public float jumpForce = 8f;
     private float dashTime;
     public float startDashTime;
+    private float startGravity;
 
     public bool canMove;
     private bool isOnGround = true;
@@ -27,6 +28,7 @@ public class PlayerController2D : MonoBehaviour
     private bool isDashing = false;
     public bool isAttacking = false;
     public bool isBlocking = false;
+    public bool canReturn = false;
 
     private Rigidbody2D playerRb2D;
     private BoxCollider2D playerBc2D;
@@ -41,6 +43,7 @@ public class PlayerController2D : MonoBehaviour
         playerAnim = GetComponent<Animator>();
 
         dashTime = startDashTime;
+        startGravity = playerRb2D.gravityScale;
         maxDashCount = 1;
     }
 
@@ -86,12 +89,12 @@ public class PlayerController2D : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space) & isOnGround)
             {
-                    playerRb2D.gravityScale = 8;
+                    playerRb2D.gravityScale = startGravity;
                     isOnGround = false;
                     playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             }
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && dashInput != Vector2.zero && dashCount != 0)
+            if (Input.GetKeyDown(KeyCode.K) && dashInput != Vector2.zero && dashCount != 0)
             {
                 dashCount--;
                 isDashing = true;
@@ -105,7 +108,7 @@ public class PlayerController2D : MonoBehaviour
                 dashTime -= Time.deltaTime;
                 if (dashTime <= 0)
                 {
-                    playerRb2D.gravityScale = 8;
+                    playerRb2D.gravityScale = startGravity;
                     dashTime = startDashTime;
                     isDashing = false;
                 }
@@ -116,7 +119,7 @@ public class PlayerController2D : MonoBehaviour
                 playerAnim.SetTrigger("Attack");
             }
 
-            if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
+            if (Input.GetKeyDown(KeyCode.L) && !isAttacking)
             {
                 playerAnim.SetTrigger("Block");
             }
@@ -133,7 +136,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (isOnGroundWall)
         {
-            playerRb2D.gravityScale = 8;
+            playerRb2D.gravityScale = startGravity;
         }
     }
 
@@ -157,6 +160,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8)
         {
+            playerRb2D.velocity = Vector2.zero;
             collisionRecoil = collision.GetContact(0).normal;
             if (collisionRecoil == Vector2.up)
             {
@@ -176,10 +180,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
         {
-            collisionRecoil = collision.GetContact(0).normal;
             playerRb2D.velocity = Vector2.zero;
-            StartCoroutine(DontMove());
-            playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
         }
     }
 
@@ -187,6 +188,7 @@ public class PlayerController2D : MonoBehaviour
     {
         if (transform.GetChild(1).gameObject.layer == 9 && collision.gameObject.layer == 8 && attackInput == Vector2.down && isOnGround == false)
         {
+            dashCount = maxDashCount;
             playerRb2D.velocity = Vector2.zero;
             playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
@@ -205,13 +207,13 @@ public class PlayerController2D : MonoBehaviour
         {
             dashCount = maxDashCount;
             playerRb2D.gravityScale = 1;
-            wallJump = collision.GetContact(0).normal / 1.5f + Vector2.up * 1.5f;
+            wallJump = collision.GetContact(0).normal * 1.2f + Vector2.up * 1.5f;
             canWallJump = true;
         }
 
         if (collision.collider.gameObject.layer == 6 && isOnGround)
         {
-            playerRb2D.gravityScale = 8;
+            playerRb2D.gravityScale = startGravity;
             isOnGroundWall = true;
         }
     }
@@ -225,7 +227,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (collision.collider.gameObject.layer == 6)
         {
-            playerRb2D.gravityScale = 8;
+            playerRb2D.gravityScale = startGravity;
             movement = movementInput * movementSpeed * Time.deltaTime;
             canWallJump = false;
             isOnGroundWall = false;

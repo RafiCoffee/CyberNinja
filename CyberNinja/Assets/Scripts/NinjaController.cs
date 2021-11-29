@@ -2,60 +2,60 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController2D : MonoBehaviour
+public class NinjaController : MonoBehaviour
 {
-    Vector2 movement;
-    Vector2 movementInput;
-    Vector2 dashInput;
-    Vector2 attackInput;
-    Vector2 blockInput;
-    Vector2 wallJump;
-    Vector2 collisionRecoil;
+    [SerializeField, Range(0, 5)]
+    int maxDashCount = 1;
 
-    public int dashCount = 1;
-    private int maxDashCount;
+    [SerializeField, Range(0f, 100f)]
+    float maxSpeed = 10f;
+    [SerializeField, Range(0f, 100f)]
+    float jumpForce = 10f;
 
-    public float movementSpeed = 40f;
-    public float jumpForce = 8f;
+    private Vector2 movementInput;
+    private Vector2 movement;
+    private Vector2 dashInput;
+    private Vector2 attackInput;
+    private Vector2 blockInput;
+    private Vector2 wallJump;
+    private Vector2 collisionRecoil;
+
+    private int dashCount;
+
     private float dashTime;
     public float startDashTime;
     private float startGravity;
 
     public bool canMove;
-    public bool jump;
-    private bool isOnGround = true;
-    public bool isOnGroundWall = false;
+    private bool jump;
     private bool canWallJump = false;
+    public bool isOnGroundWall = false;
+    private bool isOnGround;
+    private bool dash;
     private bool isDashing = false;
     public bool isAttacking = false;
     public bool isBlocking = false;
     public bool canReturn = false;
 
     private Rigidbody2D playerRb2D;
-    private BoxCollider2D playerBc2D;
     private Animator playerAnim;
 
-    public LayerMask enemy;
     // Start is called before the first frame update
     void Start()
     {
         playerRb2D = GetComponent<Rigidbody2D>();
-        playerBc2D = GetComponent<BoxCollider2D>();
         playerAnim = GetComponent<Animator>();
 
         dashTime = startDashTime;
+        dashCount = maxDashCount;
         startGravity = playerRb2D.gravityScale;
-        maxDashCount = 1;
     }
 
     // Update is called once per frame
     void Update()
     {
         movementInput.x = Input.GetAxis("Horizontal");
-
         dashInput.x = Input.GetAxisRaw("Horizontal");
-
-        jump |= Input.GetKeyDown(KeyCode.Space);
 
         if (!isAttacking)
         {
@@ -68,19 +68,24 @@ public class PlayerController2D : MonoBehaviour
             blockInput.x = Input.GetAxisRaw("Horizontal");
         }
 
+        if (isOnGround)
+        {
+            jump |= Input.GetKeyDown(KeyCode.Space);
+        }
+
         if (canMove)
         {
 
             if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1))
             {
-                if (attackInput == Vector2.down  || attackInput == Vector2.up)
+                if (attackInput == Vector2.down || attackInput == Vector2.up)
                 {
                     transform.GetChild(1).localScale = Vector3.one;
                     transform.GetChild(1).localPosition = attackInput * 2;
                 }
                 else
                 {
-                    transform.GetChild(1).localScale = new Vector3 (1, 4.1f, 1);
+                    transform.GetChild(1).localScale = new Vector3(1, 4.1f, 1);
                     transform.GetChild(1).localPosition = attackInput;
                 }
             }
@@ -89,8 +94,6 @@ public class PlayerController2D : MonoBehaviour
             {
                 transform.GetChild(2).localPosition = blockInput / 1.6f;
             }
-
-            movement = movementInput * movementSpeed;
 
             if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
             {
@@ -101,47 +104,8 @@ public class PlayerController2D : MonoBehaviour
             {
                 playerAnim.SetTrigger("Block");
             }
-        }
 
-        if (canWallJump)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                playerRb2D.AddForce(wallJump * jumpForce / 1.3f, ForceMode2D.Impulse);
-                canWallJump = false;
-            }
-        }
-
-        if (isOnGroundWall)
-        {
-            playerRb2D.gravityScale = startGravity;
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (canMove)
-        {
-                playerRb2D.velocity = movement;
-
-            if (jump & isOnGround)
-            {
-                playerRb2D.gravityScale = startGravity;
-                isOnGround = false;
-                jump = false;
-                Jump();
-            }
-
-            if (Input.GetKeyDown(KeyCode.K) && dashInput != Vector2.zero && dashCount != 0)
-            {
-                dashCount--;
-                isDashing = true;
-                playerRb2D.velocity = Vector2.zero;
-                playerRb2D.AddForce(dashInput * jumpForce / 1.8f, ForceMode2D.Impulse);
-                playerRb2D.gravityScale = 0.5f;
-            }
-
-            if (isDashing)
+            if (isDashing && !canWallJump)
             {
                 dashTime -= Time.deltaTime;
                 if (dashTime <= 0)
@@ -151,6 +115,64 @@ public class PlayerController2D : MonoBehaviour
                     isDashing = false;
                 }
             }
+            else if (!isDashing)
+            {
+                dash |= Input.GetKeyDown(KeyCode.K);
+                movement = movementInput * maxSpeed;
+            }
+
+            if (canWallJump)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    canMove = false;
+                    playerRb2D.AddForce(wallJump * jumpForce, ForceMode2D.Impulse);
+                    canWallJump = false;
+                }
+            }
+        }
+        else
+        {
+            dash |= Input.GetKeyDown(KeyCode.K);
+        }
+
+        if (isOnGroundWall)
+        {
+            playerRb2D.gravityScale = startGravity;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Debug.Log(playerRb2D.velocity);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (canMove)
+        {
+            if (jump && isOnGround)
+            {
+                jump = false;
+                Jump();
+            }
+
+            if (dash && dashInput != Vector2.zero && dashCount != 0)
+            {
+                dash = false;
+                Dash();
+            }
+
+                playerRb2D.velocity = new Vector2(movement.x, playerRb2D.velocity.y);
+        }
+        else
+        {
+            if (dash && dashInput != Vector2.zero && dashCount != 0)
+            {
+                canMove = true;
+                dash = false;
+                Dash();
+            }
         }
     }
 
@@ -159,10 +181,10 @@ public class PlayerController2D : MonoBehaviour
         if (collision.GetContact(0).normal.y == 1 & collision.collider.gameObject.layer == 3)
         {
             dashCount = maxDashCount;
+            playerRb2D.gravityScale = startGravity;
             isOnGround = true;
-            canWallJump = false;
+            canMove = true;
         }
-
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8)
         {
@@ -179,14 +201,14 @@ public class PlayerController2D : MonoBehaviour
                     collisionRecoil = collisionRecoil + Vector2.right;
                 }
             }
-            playerRb2D.velocity = Vector2.zero;
+            StartCoroutine(Invencible());
             StartCoroutine(DontMove());
             playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
         }
 
-        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
+        if (collision.collider.gameObject.layer == 6 && isOnGround == false)
         {
-            playerRb2D.velocity = Vector2.zero;
+            canMove = true;
         }
     }
 
@@ -206,14 +228,13 @@ public class PlayerController2D : MonoBehaviour
         {
             dashCount = maxDashCount;
             isOnGround = true;
-            canWallJump = false;
         }
 
         if (collision.collider.gameObject.layer == 6 && isOnGround == false)
         {
             dashCount = maxDashCount;
             playerRb2D.gravityScale = 1;
-            wallJump = collision.GetContact(0).normal * 1.2f + Vector2.up * 1.5f;
+            wallJump = collision.GetContact(0).normal / 1.2f + Vector2.up / 1.4f;
             canWallJump = true;
         }
 
@@ -234,15 +255,26 @@ public class PlayerController2D : MonoBehaviour
         if (collision.collider.gameObject.layer == 6)
         {
             playerRb2D.gravityScale = startGravity;
-            movement = movementInput * movementSpeed;
             canWallJump = false;
+            isDashing = false;
             isOnGroundWall = false;
         }
     }
 
+
     void Jump()
     {
-        movement.y += 500;
+        isOnGround = false;
+        playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    void Dash()
+    {
+        dashCount--;
+        isDashing = true;
+        playerRb2D.velocity = Vector2.zero;
+        movement += dashInput * jumpForce;
+        playerRb2D.gravityScale = 0.5f;
     }
 
     IEnumerator DontMove()
@@ -250,5 +282,17 @@ public class PlayerController2D : MonoBehaviour
         canMove = false;
         yield return new WaitForSeconds(0.4f);
         canMove = true;
+        movement = playerRb2D.velocity;
+    }
+
+    IEnumerator Invencible()
+    {
+        transform.GetChild(0).gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(true);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(true);
     }
 }

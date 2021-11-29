@@ -7,12 +7,12 @@ public class Bullet : MonoBehaviour
 
     public int speed;
 
-    private PlayerController2D playerScript;
+    private NinjaController playerScript;
 
     // Start is called before the first frame update
     void Start()
     {
-        playerScript = GameObject.Find("Player").GetComponent<PlayerController2D>();
+        playerScript = GameObject.Find("Player").GetComponent<NinjaController>();
     }
 
     // Update is called once per frame

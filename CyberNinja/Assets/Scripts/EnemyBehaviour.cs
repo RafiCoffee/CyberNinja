@@ -36,10 +36,12 @@ public class EnemyBehaviour : MonoBehaviour
         if (player.transform.position.x > transform.position.x)
         {
             transform.rotation = Quaternion.Euler(0, 180, 0);
+            //transform.GetChild(1).GetChild(1).rotation = 
         }
         else
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
+            //transform.GetChild(1).GetChild(1).rotation = 
         }
 
         if (timer.ElapsedMilliseconds / 1000 > coolDown)

@@ -20,8 +20,11 @@ public class NinjaController : MonoBehaviour
     private Vector2 wallJump;
     private Vector2 collisionRecoil;
 
+    private Quaternion playerRotation;
+
     private int dashCount;
 
+    private float movementAnim;
     private float dashTime;
     public float startDashTime;
     private float startGravity;
@@ -44,7 +47,7 @@ public class NinjaController : MonoBehaviour
     void Start()
     {
         playerRb2D = GetComponent<Rigidbody2D>();
-        playerAnim = GetComponent<Animator>();
+        playerAnim = transform.GetChild(0).GetComponent<Animator>();
 
         dashTime = startDashTime;
         dashCount = maxDashCount;
@@ -54,36 +57,63 @@ public class NinjaController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        movementAnim = Input.GetAxisRaw("Horizontal");
         movementInput.x = Input.GetAxis("Horizontal");
         dashInput.x = Input.GetAxisRaw("Horizontal");
 
-        if (!isAttacking)
+        if (!canWallJump)
         {
-            attackInput.x = Input.GetAxisRaw("Horizontal");
-            attackInput.y = Input.GetAxisRaw("Vertical");
+            if (!isAttacking)
+            {
+                attackInput.x = Input.GetAxisRaw("Horizontal");
+                attackInput.y = Input.GetAxisRaw("Vertical");
+            }
+            else
+            {
+                playerRotation = transform.GetChild(0).rotation;
+                transform.GetChild(0).rotation = playerRotation;
+            }
+
+            if (!isBlocking)
+            {
+                blockInput.x = Input.GetAxisRaw("Horizontal");
+            }
+            else
+            {
+                playerRotation = transform.GetChild(0).rotation;
+                transform.GetChild(0).rotation = playerRotation;
+            }
+
+            if (isOnGround)
+            {
+                jump |= Input.GetKeyDown(KeyCode.Space);
+            }
+
         }
 
-        if (!isBlocking)
+        if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
         {
-            blockInput.x = Input.GetAxisRaw("Horizontal");
+            playerAnim.SetTrigger("Attack");
         }
 
-        if (isOnGround)
+        if (Input.GetKeyDown(KeyCode.L) && !isAttacking)
         {
-            jump |= Input.GetKeyDown(KeyCode.Space);
+            playerAnim.SetTrigger("Block");
         }
+
 
         if (canMove)
         {
+            playerAnim.SetInteger("Movement", (int)movementAnim);
 
             if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1))
             {
-                if (attackInput == Vector2.down || attackInput == Vector2.up)
+                if (attackInput.y == -1 && !isOnGround || attackInput.y == 1)
                 {
                     transform.GetChild(1).localScale = Vector3.one;
-                    transform.GetChild(1).localPosition = attackInput * 2;
+                    transform.GetChild(1).localPosition = attackInput * 3;
                 }
-                else
+                else if (attackInput == Vector2.right || attackInput == Vector2.left)
                 {
                     transform.GetChild(1).localScale = new Vector3(1, 4.1f, 1);
                     transform.GetChild(1).localPosition = attackInput;
@@ -93,16 +123,6 @@ public class NinjaController : MonoBehaviour
             if (blockInput != Vector2.zero)
             {
                 transform.GetChild(2).localPosition = blockInput / 1.6f;
-            }
-
-            if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
-            {
-                playerAnim.SetTrigger("Attack");
-            }
-
-            if (Input.GetKeyDown(KeyCode.L) && !isAttacking)
-            {
-                playerAnim.SetTrigger("Block");
             }
 
             if (isDashing && !canWallJump)
@@ -117,23 +137,51 @@ public class NinjaController : MonoBehaviour
             }
             else if (!isDashing)
             {
-                dash |= Input.GetKeyDown(KeyCode.K);
+                if (movementInput.x != 0)
+                {
+                    dash |= Input.GetKeyDown(KeyCode.K);
+                }
                 movement = movementInput * maxSpeed;
             }
 
             if (canWallJump)
             {
+                if (wallJump.x > 0)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+                }
+                else if (wallJump.x < 0)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+                }
+                attackInput.x = wallJump.x;
+                blockInput.x = wallJump.x;
+                dash = false;
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     canMove = false;
-                    playerRb2D.AddForce(wallJump * jumpForce, ForceMode2D.Impulse);
+                    playerRb2D.AddForce(wallJump * jumpForce / 1.5f, ForceMode2D.Impulse);
                     canWallJump = false;
+                }
+            }
+            else if (!canWallJump && !isAttacking && !isBlocking)
+            {
+                if (movementInput.x > 0)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+                }
+                else if (movementInput.x < 0)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
                 }
             }
         }
         else
         {
-            dash |= Input.GetKeyDown(KeyCode.K);
+            if (movementInput.x != 0)
+            {
+                dash |= Input.GetKeyDown(KeyCode.K);
+            }
         }
 
         if (isOnGroundWall)
@@ -203,7 +251,7 @@ public class NinjaController : MonoBehaviour
             }
             StartCoroutine(Invencible());
             StartCoroutine(DontMove());
-            playerRb2D.AddForce(collisionRecoil * jumpForce / 1.8f, ForceMode2D.Impulse);
+            playerRb2D.AddForce(collisionRecoil * jumpForce / 2f, ForceMode2D.Impulse);
         }
 
         if (collision.collider.gameObject.layer == 6 && isOnGround == false)
@@ -226,6 +274,7 @@ public class NinjaController : MonoBehaviour
     {
         if (collision.GetContact(0).normal.y == 1 & collision.collider.gameObject.layer == 3)
         {
+            playerRb2D.gravityScale = startGravity;
             dashCount = maxDashCount;
             isOnGround = true;
         }
@@ -234,7 +283,7 @@ public class NinjaController : MonoBehaviour
         {
             dashCount = maxDashCount;
             playerRb2D.gravityScale = 1;
-            wallJump = collision.GetContact(0).normal / 1.2f + Vector2.up / 1.4f;
+            wallJump = collision.GetContact(0).normal + Vector2.up;
             canWallJump = true;
         }
 
@@ -265,6 +314,7 @@ public class NinjaController : MonoBehaviour
     void Jump()
     {
         isOnGround = false;
+        playerRb2D.velocity = Vector2.zero;
         playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
 
@@ -273,6 +323,7 @@ public class NinjaController : MonoBehaviour
         dashCount--;
         isDashing = true;
         playerRb2D.velocity = Vector2.zero;
+        movement = Vector2.zero;
         movement += dashInput * jumpForce;
         playerRb2D.gravityScale = 0.5f;
     }
@@ -280,9 +331,10 @@ public class NinjaController : MonoBehaviour
     IEnumerator DontMove()
     {
         canMove = false;
+        isDashing = false;
         yield return new WaitForSeconds(0.4f);
         canMove = true;
-        movement = playerRb2D.velocity;
+        //movement = playerRb2D.velocity;
     }
 
     IEnumerator Invencible()

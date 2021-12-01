@@ -40,6 +40,9 @@ public class NinjaController : MonoBehaviour
     public bool isBlocking = false;
     public bool canReturn = false;
 
+    public GameObject attackTrigger;
+    public GameObject blockTrigger;
+
     private Rigidbody2D playerRb2D;
     private Animator playerAnim;
 
@@ -47,7 +50,7 @@ public class NinjaController : MonoBehaviour
     void Start()
     {
         playerRb2D = GetComponent<Rigidbody2D>();
-        playerAnim = transform.GetChild(0).GetComponent<Animator>();
+        playerAnim = transform.GetChild(0).GetChild(0).GetComponent<Animator>();
 
         dashTime = startDashTime;
         dashCount = maxDashCount;
@@ -60,6 +63,11 @@ public class NinjaController : MonoBehaviour
         movementAnim = Input.GetAxisRaw("Horizontal");
         movementInput.x = Input.GetAxis("Horizontal");
         dashInput.x = Input.GetAxisRaw("Horizontal");
+
+        if (dashInput.x == 0)
+        {
+            dash = false;
+        }
 
         if (!canWallJump)
         {
@@ -93,12 +101,12 @@ public class NinjaController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
         {
-            playerAnim.SetTrigger("Attack");
+            StartCoroutine(Attack());
         }
 
         if (Input.GetKeyDown(KeyCode.L) && !isAttacking)
         {
-            playerAnim.SetTrigger("Block");
+            StartCoroutine(Block());
         }
 
 
@@ -334,7 +342,6 @@ public class NinjaController : MonoBehaviour
         isDashing = false;
         yield return new WaitForSeconds(0.4f);
         canMove = true;
-        //movement = playerRb2D.velocity;
     }
 
     IEnumerator Invencible()
@@ -346,5 +353,27 @@ public class NinjaController : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
+    }
+
+    IEnumerator Attack()
+    {
+        isAttacking = true;
+        attackTrigger.SetActive(true);
+        yield return new WaitForSeconds(0.25f);
+        isAttacking = false;
+        attackTrigger.SetActive(false);
+    }
+
+    IEnumerator Block()
+    {
+        yield return new WaitForSeconds(0.1f);
+        canReturn = true;
+        isBlocking = true;
+        blockTrigger.SetActive(true);
+        yield return new WaitForSeconds(0.05f);
+        canReturn = false;
+        yield return new WaitForSeconds(0.25f);
+        isBlocking = false;
+        blockTrigger.SetActive(false);
     }
 }

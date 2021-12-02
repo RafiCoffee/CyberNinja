@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class NinjaController : MonoBehaviour
 {
@@ -28,6 +30,7 @@ public class NinjaController : MonoBehaviour
     private float dashTime;
     public float startDashTime;
     private float startGravity;
+    public float blockCoolDown;
 
     public bool canMove;
     private bool jump;
@@ -46,6 +49,8 @@ public class NinjaController : MonoBehaviour
     private Rigidbody2D playerRb2D;
     private Animator playerAnim;
 
+    private Stopwatch blockTimer = new Stopwatch();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +60,8 @@ public class NinjaController : MonoBehaviour
         dashTime = startDashTime;
         dashCount = maxDashCount;
         startGravity = playerRb2D.gravityScale;
+
+        blockTimer.Start();
     }
 
     // Update is called once per frame
@@ -99,12 +106,12 @@ public class NinjaController : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.J) && !isBlocking)
+        if (Input.GetKeyDown(KeyCode.J) && !isBlocking && !isAttacking)
         {
             StartCoroutine(Attack());
         }
 
-        if (Input.GetKeyDown(KeyCode.L) && !isAttacking)
+        if (Input.GetKeyDown(KeyCode.L) && !isAttacking && !isBlocking && blockTimer.ElapsedMilliseconds / 1000 >= blockCoolDown)
         {
             StartCoroutine(Block());
         }
@@ -242,7 +249,7 @@ public class NinjaController : MonoBehaviour
             canMove = true;
         }
 
-        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8)
+        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8 || gameObject.layer == 7 && collision.collider.gameObject.layer == 12 || gameObject.layer == 7 && collision.collider.gameObject.layer == 13)
         {
             playerRb2D.velocity = Vector2.zero;
             collisionRecoil = collision.GetContact(0).normal;
@@ -257,7 +264,10 @@ public class NinjaController : MonoBehaviour
                     collisionRecoil = collisionRecoil + Vector2.right;
                 }
             }
-            StartCoroutine(Invencible());
+            if (collision.collider.gameObject.layer != 13)
+            {
+                StartCoroutine(Invencible());
+            }
             StartCoroutine(DontMove());
             playerRb2D.AddForce(collisionRecoil * jumpForce / 2f, ForceMode2D.Impulse);
         }
@@ -338,6 +348,7 @@ public class NinjaController : MonoBehaviour
 
     IEnumerator DontMove()
     {
+        playerRb2D.gravityScale = startGravity;
         canMove = false;
         isDashing = false;
         yield return new WaitForSeconds(0.4f);
@@ -375,5 +386,6 @@ public class NinjaController : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         isBlocking = false;
         blockTrigger.SetActive(false);
+        blockTimer.Restart();
     }
 }

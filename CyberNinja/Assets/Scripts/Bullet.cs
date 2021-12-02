@@ -25,6 +25,7 @@ public class Bullet : MonoBehaviour
     {
         if (collision.collider.gameObject.layer == 7)
         {
+            Debug.Log("Te di");
             gameObject.SetActive(false);
         }
     }
@@ -35,10 +36,12 @@ public class Bullet : MonoBehaviour
         {
             if (playerScript.canReturn)
             {
-                transform.parent.parent.gameObject.SetActive(false);
+                Debug.Log("Devuelto");
+                transform.parent.parent.GetChild(0).GetComponent<EnemyBehaviour>().vida--;
             }
             else
             {
+                Debug.Log("No Devuelto");
                 gameObject.SetActive(false);
             }
         }

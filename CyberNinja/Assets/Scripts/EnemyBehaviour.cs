@@ -7,10 +7,17 @@ public class EnemyBehaviour : MonoBehaviour
 {
     Vector2 followPlayer;
 
+    public int vida;
+
     public float coolDown;
+
+    public bool canShoot = false;
+    public bool haveShield;
 
     private GameObject bullet;
     private GameObject player;
+    public GameObject fusilI;
+    public GameObject fusilD;
 
     private Stopwatch timer = new Stopwatch();
 
@@ -22,6 +29,7 @@ public class EnemyBehaviour : MonoBehaviour
         player = GameObject.Find("Player");
 
         followPlayer = player.transform.position - transform.position;
+        canShoot = false;
 
         timer.Start();
     }
@@ -36,18 +44,31 @@ public class EnemyBehaviour : MonoBehaviour
         if (player.transform.position.x > transform.position.x)
         {
             transform.rotation = Quaternion.Euler(0, 180, 0);
-            //transform.GetChild(1).GetChild(1).rotation = 
+            fusilI.SetActive(false);
+            fusilD.SetActive(true);
         }
         else
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
-            //transform.GetChild(1).GetChild(1).rotation = 
+            fusilI.SetActive(true);
+            fusilD.SetActive(false);
         }
 
-        if (timer.ElapsedMilliseconds / 1000 > coolDown)
+        if (timer.ElapsedMilliseconds / 1000 > coolDown && canShoot)
         {
             Shoot();
             timer.Restart();
+        }
+
+        if (vida <= 3)
+        {
+            transform.GetChild(2).gameObject.SetActive(false);
+            gameObject.layer = 8;
+        }
+
+        if (vida == 0)
+        {
+            gameObject.SetActive(false);
         }
     }
 
@@ -55,7 +76,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (collision.gameObject.layer == 9)
         {
-            gameObject.SetActive(false);
+            vida--;
         }
     }
 

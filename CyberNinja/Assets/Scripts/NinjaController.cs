@@ -21,10 +21,12 @@ public class NinjaController : MonoBehaviour
     private Vector2 blockInput;
     private Vector2 wallJump;
     private Vector2 collisionRecoil;
+    public Vector2 bulletCollision;
 
     private Quaternion playerRotation;
 
     private int dashCount;
+    public int vida = 5;
 
     private float movementAnim;
     private float dashTime;
@@ -42,11 +44,13 @@ public class NinjaController : MonoBehaviour
     public bool isAttacking = false;
     public bool isBlocking = false;
     public bool canReturn = false;
+    public bool bulletOnBack;
 
     public GameObject attackTrigger;
     public GameObject blockTrigger;
 
     private Rigidbody2D playerRb2D;
+    private BoxCollider2D playerBC;
     private Animator playerAnim;
 
     private Stopwatch blockTimer = new Stopwatch();
@@ -55,6 +59,7 @@ public class NinjaController : MonoBehaviour
     void Start()
     {
         playerRb2D = GetComponent<Rigidbody2D>();
+        playerBC = GetComponent<BoxCollider2D>();
         playerAnim = transform.GetChild(0).GetChild(0).GetComponent<Animator>();
 
         dashTime = startDashTime;
@@ -116,6 +121,14 @@ public class NinjaController : MonoBehaviour
             StartCoroutine(Block());
         }
 
+        if (isBlocking)
+        {
+            playerBC.enabled = false;
+        }
+        else
+        {
+            playerBC.enabled = true;
+        }
 
         if (canMove)
         {
@@ -145,6 +158,7 @@ public class NinjaController : MonoBehaviour
                 dashTime -= Time.deltaTime;
                 if (dashTime <= 0)
                 {
+                    gameObject.layer = 7;
                     playerRb2D.gravityScale = startGravity;
                     dashTime = startDashTime;
                     isDashing = false;
@@ -276,6 +290,12 @@ public class NinjaController : MonoBehaviour
         {
             canMove = true;
         }
+
+        if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
+        {
+            bulletCollision = playerBC.offset;
+            Debug.Log(bulletCollision);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -339,6 +359,7 @@ public class NinjaController : MonoBehaviour
     void Dash()
     {
         dashCount--;
+        gameObject.layer = 14;
         isDashing = true;
         playerRb2D.velocity = Vector2.zero;
         movement = Vector2.zero;

@@ -25,7 +25,6 @@ public class Bullet : MonoBehaviour
     {
         if (collision.collider.gameObject.layer == 7)
         {
-            Debug.Log("Te di");
             gameObject.SetActive(false);
         }
     }

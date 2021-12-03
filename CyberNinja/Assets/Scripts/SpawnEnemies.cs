@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class SpawnEnemies : MonoBehaviour
 {
-    public GameObject[] pooledEnemy;
+    public GameObject pooledEnemy;
     public int pooledSize;
     public GameObject[] poolList;
 
     private Vector3 randomPos;
-    private int enemyIndex;
+
     private bool areSpawning = true;
     // Start is called before the first frame update
     void Start()
@@ -17,7 +17,7 @@ public class SpawnEnemies : MonoBehaviour
         poolList = new GameObject[pooledSize];
         for (int i = 0; i < poolList.Length; i++)
         {
-            poolList[i] = Instantiate(pooledEnemy[enemyIndex], transform);
+            poolList[i] = Instantiate(pooledEnemy, transform);
             poolList[i].SetActive(false);
         }
     }

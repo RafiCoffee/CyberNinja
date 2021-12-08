@@ -123,11 +123,11 @@ public class NinjaController : MonoBehaviour
 
         if (isBlocking)
         {
-            playerBC.enabled = false;
+            gameObject.layer = 14;
         }
         else
         {
-            playerBC.enabled = true;
+            gameObject.layer = 7;
         }
 
         if (canMove)
@@ -155,6 +155,7 @@ public class NinjaController : MonoBehaviour
 
             if (isDashing && !canWallJump)
             {
+                gameObject.layer = 14;
                 dashTime -= Time.deltaTime;
                 if (dashTime <= 0)
                 {

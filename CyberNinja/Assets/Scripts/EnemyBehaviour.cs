@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
+using UDebug = UnityEngine.Debug;
 
 public class EnemyBehaviour : MonoBehaviour
 {
-    Vector2 followPlayer;
+    public Vector2 followPlayer;
 
     public int vida;
 
@@ -16,8 +17,6 @@ public class EnemyBehaviour : MonoBehaviour
 
     private GameObject bullet;
     private GameObject player;
-    public GameObject fusilI;
-    public GameObject fusilD;
 
     private Stopwatch timer = new Stopwatch();
 
@@ -37,21 +36,16 @@ public class EnemyBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        followPlayer = player.transform.position - transform.position;
-
-        transform.GetChild(1).up = followPlayer;
+        transform.GetChild(1).LookAt(player.transform.position, Vector2.up);
+        transform.GetChild(1).position = transform.GetChild(0).GetChild(0).position;
 
         if (player.transform.position.x > transform.position.x)
         {
             transform.rotation = Quaternion.Euler(0, 180, 0);
-            fusilI.SetActive(false);
-            fusilD.SetActive(true);
         }
         else
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
-            fusilI.SetActive(true);
-            fusilD.SetActive(false);
         }
 
         if (timer.ElapsedMilliseconds / 1000 > coolDown && canShoot)
@@ -59,16 +53,25 @@ public class EnemyBehaviour : MonoBehaviour
             Shoot();
             timer.Restart();
         }
-
-        if (vida <= 3)
+        
+        if (haveShield)
         {
-            transform.GetChild(2).gameObject.SetActive(false);
-            gameObject.layer = 8;
+            if (vida <= 3)
+            {
+                transform.GetChild(2).gameObject.SetActive(false);
+                gameObject.layer = 8;
+                haveShield = false;
+            }
         }
 
         if (vida == 0)
         {
             gameObject.SetActive(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UDebug.Log(player.transform.position);
         }
     }
 

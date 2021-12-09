@@ -359,12 +359,13 @@ public class NinjaController : MonoBehaviour
 
     void Dash()
     {
+        playerAnim.SetTrigger("Dash");
         dashCount--;
         gameObject.layer = 14;
         isDashing = true;
         playerRb2D.velocity = Vector2.zero;
         movement = Vector2.zero;
-        movement += dashInput * jumpForce;
+        movement += dashInput * jumpForce * 1.5f;
         playerRb2D.gravityScale = 0.5f;
     }
 

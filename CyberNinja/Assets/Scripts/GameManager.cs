@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        checkpointManagerScript = GameObject.Find("CheckpointManager").GetComponent<CheckpointManager>();
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(1);

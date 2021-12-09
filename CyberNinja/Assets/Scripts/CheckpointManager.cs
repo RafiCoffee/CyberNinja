@@ -6,7 +6,7 @@ public class CheckpointManager : MonoBehaviour
 {
     public Vector2 spawnPoint;
 
-    private int checkpoint = 0;
+    public int checkpoint = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -17,26 +17,25 @@ public class CheckpointManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (transform.GetChild(checkpoint).GetComponent<Checkpoint>().isEnabled)
+        if (checkpoint < transform.childCount)
         {
-            spawnPoint = transform.GetChild(checkpoint).position;
-            if (checkpoint < transform.childCount - 1)
+            if (transform.GetChild(checkpoint).GetComponent<Checkpoint>().isEnabled)
             {
+                spawnPoint = transform.GetChild(checkpoint).position;
                 checkpoint++;
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        switch(checkpoint)
         {
-            Debug.Log(checkpoint);
-        }
+            case 2:
+                transform.GetChild(0).gameObject.SetActive(false);
+                break;
 
-        if (checkpoint != 0)
-        {
-            for (int i = checkpoint - 1; i >= 0; i--)
-            {
-                transform.GetChild(i).gameObject.SetActive(false);
-            }
+            case 3:
+                transform.GetChild(0).gameObject.SetActive(false);
+                transform.GetChild(1).gameObject.SetActive(false);
+                break;
         }
     }
 }

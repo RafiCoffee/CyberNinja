@@ -6,7 +6,7 @@ public class Checkpoint : MonoBehaviour
 {
     public bool isEnabled = false;
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject.layer == 7)
         {

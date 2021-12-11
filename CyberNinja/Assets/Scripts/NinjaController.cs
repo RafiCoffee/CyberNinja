@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+using UnityEngine.UI;
 
 public class NinjaController : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class NinjaController : MonoBehaviour
 
     private int dashCount;
     public int attackCount = 0;
-    public int vida = 5;
+    public int vida = 8;
 
     private float movementAnim;
     private float dashTime;
@@ -52,6 +53,8 @@ public class NinjaController : MonoBehaviour
     public GameObject attackTrigger;
     public GameObject blockTrigger;
     public GameObject katana;
+
+    public Slider barraVida;
 
     public TrailRenderer eyeR;
     public TrailRenderer eyeI;
@@ -85,6 +88,8 @@ public class NinjaController : MonoBehaviour
         movementAnim = Input.GetAxisRaw("Horizontal");
         movementInput.x = Input.GetAxis("Horizontal");
         dashInput.x = Input.GetAxisRaw("Horizontal");
+
+        barraVida.value = vida;
 
         if (dashCount == 0)
         {
@@ -177,23 +182,23 @@ public class NinjaController : MonoBehaviour
                 playerAnim.SetLayerWeight(1, 1);
             }
 
-            if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1))
+            if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1) && attackInput != Vector2.up)
             {
-                if (attackInput.y == -1 && !isOnGround || attackInput.y == 1)
+                if (attackInput.y == -1 && !isOnGround)
                 {
-                    transform.GetChild(1).localScale = Vector3.one;
-                    transform.GetChild(1).localPosition = attackInput * 2;
+                    transform.GetChild(1).localScale = new Vector2 (4, 2);
+                    transform.GetChild(1).localPosition = attackInput;
                 }
                 else if (attackInput == Vector2.right || attackInput == Vector2.left)
                 {
-                    transform.GetChild(1).localScale = new Vector3(1, 4.1f, 1);
-                    transform.GetChild(1).localPosition = attackInput;
+                    transform.GetChild(1).localScale = new Vector2(2, 4);
+                    transform.GetChild(1).localPosition = attackInput * 1.5f;
                 }
             }
 
             if (blockInput != Vector2.zero)
             {
-                transform.GetChild(2).localPosition = blockInput * 1.15f;
+                transform.GetChild(2).localPosition = blockInput * 1.2f;
             }
 
             if (isDashing && !canWallJump)
@@ -271,9 +276,9 @@ public class NinjaController : MonoBehaviour
             playerRb2D.gravityScale = startGravity;
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (vida == 0)
         {
-            Debug.Log(playerRb2D.velocity);
+            gameObject.SetActive(false);
         }
     }
 
@@ -338,6 +343,7 @@ public class NinjaController : MonoBehaviour
             }
             StartCoroutine(DontMove());
             playerRb2D.AddForce(collisionRecoil * jumpForce / 2f, ForceMode2D.Impulse);
+            vida--;
         }
 
         if (collision.collider.gameObject.layer == 6 && isOnGround == false)
@@ -348,7 +354,6 @@ public class NinjaController : MonoBehaviour
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
         {
             bulletCollision = playerBC.offset;
-            Debug.Log(bulletCollision);
         }
     }
 
@@ -359,6 +364,7 @@ public class NinjaController : MonoBehaviour
             dashCount = maxDashCount;
             playerRb2D.velocity = Vector2.zero;
             playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            playerAnim.SetTrigger("SaltoEnemy");
         }
     }
 

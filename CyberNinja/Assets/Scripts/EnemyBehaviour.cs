@@ -17,6 +17,10 @@ public class EnemyBehaviour : MonoBehaviour
 
     private GameObject bullet;
     private GameObject player;
+    public GameObject spine;
+    public GameObject cañon;
+
+    public Animator enemyAnim;
 
     private Stopwatch timer = new Stopwatch();
 
@@ -25,7 +29,7 @@ public class EnemyBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.Find("Player");
+        player = GameObject.Find("EnemyPoint");
 
         followPlayer = player.transform.position - transform.position;
         canShoot = false;
@@ -36,16 +40,21 @@ public class EnemyBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.GetChild(1).LookAt(player.transform.position, Vector2.up);
-        transform.GetChild(1).position = transform.GetChild(0).GetChild(0).position;
+        enemyAnim.SetBool("CanShoot", canShoot);
 
-        if (player.transform.position.x > transform.position.x)
+        if (canShoot)
         {
-            transform.rotation = Quaternion.Euler(0, 180, 0);
-        }
-        else
-        {
-            transform.rotation = Quaternion.Euler(0, 0, 0);
+            enemyAnim.SetLayerWeight(1, 1);
+            spine.transform.LookAt(player.transform.position);
+
+            if (player.transform.position.x > transform.position.x)
+            {
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
         }
 
         if (timer.ElapsedMilliseconds / 1000 > coolDown && canShoot)
@@ -79,6 +88,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (collision.gameObject.layer == 9)
         {
+            StartCoroutine(Invencible());
             vida--;
         }
     }
@@ -86,8 +96,19 @@ public class EnemyBehaviour : MonoBehaviour
     void Shoot()
     {
         bullet = bulletPoolScript.GetPooledObject();
-        bullet.transform.position = transform.GetChild(1).GetChild(0).position;
-        bullet.transform.rotation = transform.GetChild(1).GetChild(0).rotation;
+        bullet.transform.position = cañon.transform.position;
+        bullet.transform.rotation = cañon.transform.rotation;
         bullet.SetActive(true);
+    }
+
+    IEnumerator Invencible()
+    {
+        transform.GetChild(0).gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(true);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.1f);
+        transform.GetChild(0).gameObject.SetActive(true);
     }
 }

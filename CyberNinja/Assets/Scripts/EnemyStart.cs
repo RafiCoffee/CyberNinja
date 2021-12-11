@@ -22,10 +22,12 @@ public class EnemyStart : MonoBehaviour
     {
         if (transform.position.z > 0)
         {
+            transform.rotation = Quaternion.Euler(0, -90, 0);
             transform.position = Vector3.MoveTowards(transform.position, new Vector3 (transform.position.x, transform.position.y, 0), speed * Time.deltaTime);
         }
         else if (transform.position.z == 0)
         {
+            transform.rotation = Quaternion.Euler(0, 0, 0);
             transform.GetChild(0).GetComponent<EnemyBehaviour>().canShoot = true;
             enemyBC.enabled = true;
         }

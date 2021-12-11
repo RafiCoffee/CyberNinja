@@ -7,6 +7,8 @@ public class Bullet : MonoBehaviour
 
     public int speed;
 
+    public bool boss;
+
     private NinjaController playerScript;
 
     // Start is called before the first frame update
@@ -23,8 +25,14 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.collider.gameObject.layer == 6 || collision.collider.gameObject.layer == 3)
+        {
+            gameObject.SetActive(false);
+        }
+
         if (collision.collider.gameObject.layer == 7)
         {
+            transform.parent.parent.GetChild(0).GetComponent<NinjaController>().vida--;
             gameObject.SetActive(false);
         }
     }
@@ -36,7 +44,15 @@ public class Bullet : MonoBehaviour
             if (playerScript.canReturn)
             {
                 Debug.Log("Devuelto");
-                transform.parent.parent.GetChild(0).GetComponent<EnemyBehaviour>().vida--;
+                if (!boss)
+                {
+                    transform.parent.parent.GetChild(0).GetComponent<EnemyBehaviour>().vida--;
+                }
+                else
+                {
+                    transform.parent.parent.GetComponent<BossBehaviour>().vida--;
+                }
+                gameObject.SetActive(false);
             }
             else
             {

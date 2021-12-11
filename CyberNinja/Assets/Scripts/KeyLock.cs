@@ -21,12 +21,15 @@ public class KeyLock : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        keyCard.SetActive(true);
+        if (collision.gameObject.layer == 7)
+        {
+            keyCard.SetActive(true);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!isOpen)
+        if (!isOpen && collision.gameObject.layer == 7)
         {
             keyCard.SetActive(false);
         }

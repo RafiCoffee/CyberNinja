@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7775454119698551830}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Door_KeyLock_Boss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 3463371683948893949}
   - component: {fileID: 3463371683948893948}
   - component: {fileID: 3463371683948893947}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: CloseBoss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -103,7 +103,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c06e66732c4732c45b3cbb93edfe459c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bossCameraPoint: {fileID: 0}
+  barraBoss: {fileID: 0}
+  OFF: {fileID: 0}
+  keyLock: {fileID: 0}
   doorAnim: {fileID: 2453483780404286507}
+  camara: {fileID: 0}
 --- !u!1001 &3924949664553207889
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -114,6 +119,10 @@ PrefabInstance:
     - target: {fileID: 3207961920937701213, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4620654255856332170, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
+      propertyPath: m_Layer
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6313224461291690124, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
       propertyPath: m_RootOrder
@@ -163,6 +172,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: LabDoor
       objectReference: {fileID: 0}
+    - target: {fileID: 6689750480465773110, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
+      propertyPath: m_Layer
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 7046991609480165556, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
+      propertyPath: m_Layer
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 7966863989811080887, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
+      propertyPath: m_Layer
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 8010910933677299050, guid: 84d6ecff753feb344a5efa3060e407bf, type: 3}
       propertyPath: m_Size.x
       value: 2.1
@@ -190,6 +211,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7775454119698551830}
     m_Modifications:
+    - target: {fileID: 4615053104053933028, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
+      propertyPath: m_Layer
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 5778963709605054965, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.13
@@ -229,6 +254,10 @@ PrefabInstance:
     - target: {fileID: 5778963709605054965, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6591247082484552527, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
+      propertyPath: m_Layer
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6591247082484552527, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
       propertyPath: m_IsActive
@@ -281,6 +310,10 @@ PrefabInstance:
     - target: {fileID: 6933818813029136406, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
       propertyPath: m_Name
       value: KeyLock
+      objectReference: {fileID: 0}
+    - target: {fileID: 6933818813029136406, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
+      propertyPath: m_Layer
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 7617838411738468552, guid: e018f4451f3865c41b2fbe1024bbd949, type: 3}
       propertyPath: doorAnim

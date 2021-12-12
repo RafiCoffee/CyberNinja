@@ -6,7 +6,7 @@ using UDebug = UnityEngine.Debug;
 
 public class EnemyBehaviour : MonoBehaviour
 {
-    public Vector2 followPlayer;
+    private Vector2 followPlayer;
 
     public int vida;
 
@@ -14,6 +14,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     public bool canShoot = false;
     public bool haveShield;
+    private bool invencible = false;
 
     private GameObject bullet;
     private GameObject player;
@@ -21,15 +22,17 @@ public class EnemyBehaviour : MonoBehaviour
     public GameObject cañon;
 
     public Animator enemyAnim;
+    public Animator shieldAnim;
 
     private Stopwatch timer = new Stopwatch();
 
-    public BulletPool bulletPoolScript;
+    private BulletPool bulletPoolScript;
 
     // Start is called before the first frame update
     void Start()
     {
         player = GameObject.Find("EnemyPoint");
+        bulletPoolScript = GetComponentInChildren<BulletPool>();
 
         followPlayer = player.transform.position - transform.position;
         canShoot = false;
@@ -65,9 +68,9 @@ public class EnemyBehaviour : MonoBehaviour
         
         if (haveShield)
         {
-            if (vida <= 3)
+            if (vida < 3)
             {
-                transform.GetChild(2).gameObject.SetActive(false);
+                shieldAnim.SetTrigger("Quit");
                 gameObject.layer = 8;
                 haveShield = false;
             }
@@ -77,19 +80,17 @@ public class EnemyBehaviour : MonoBehaviour
         {
             gameObject.SetActive(false);
         }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            UDebug.Log(player.transform.position);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.layer == 9)
         {
-            StartCoroutine(Invencible());
-            vida--;
+            if (!invencible)
+            {
+                StartCoroutine(Invencible());
+                vida--;
+            }
         }
     }
 
@@ -103,6 +104,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     IEnumerator Invencible()
     {
+        invencible = true;
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
@@ -110,5 +112,6 @@ public class EnemyBehaviour : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
+        invencible = false;
     }
 }

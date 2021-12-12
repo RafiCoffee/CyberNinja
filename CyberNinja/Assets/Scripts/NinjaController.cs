@@ -49,6 +49,7 @@ public class NinjaController : MonoBehaviour
     public bool bulletOnBack;
     public bool wallLeft = false;
     public bool wallRight = false;
+    private bool invencible = false;
 
     public GameObject attackTrigger;
     public GameObject blockTrigger;
@@ -227,10 +228,13 @@ public class NinjaController : MonoBehaviour
                 if (wallJump.x > 0)
                 {
                     transform.GetChild(0).rotation = Quaternion.Euler(0, 180, 0);
+                    playerAnim.SetTrigger("Wall D");
                 }
                 else if (wallJump.x < 0)
                 {
-                    transform.GetChild(0).rotation = Quaternion.Euler(0, -180, 0);
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, 180, 0);
+                    Debug.Log("casi");
+                    playerAnim.SetTrigger("Wall I");
                 }
                 attackInput.x = wallJump.x;
                 blockInput.x = wallJump.x;
@@ -248,6 +252,7 @@ public class NinjaController : MonoBehaviour
                     else if (wallJump.x > 0)
                     {
                         transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+                        Debug.Log("casi");
                     }
                 }
             }
@@ -337,13 +342,13 @@ public class NinjaController : MonoBehaviour
                     collisionRecoil = collisionRecoil + Vector2.right;
                 }
             }
-            if (collision.collider.gameObject.layer != 13)
+            if (collision.collider.gameObject.layer != 13 && !invencible)
             {
                 StartCoroutine(Invencible());
+                vida--;
             }
             StartCoroutine(DontMove());
             playerRb2D.AddForce(collisionRecoil * jumpForce / 2f, ForceMode2D.Impulse);
-            vida--;
         }
 
         if (collision.collider.gameObject.layer == 6 && isOnGround == false)
@@ -354,6 +359,11 @@ public class NinjaController : MonoBehaviour
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
         {
             bulletCollision = playerBC.offset;
+            if (!invencible)
+            {
+                StartCoroutine(Invencible());
+                vida--;
+            }
         }
     }
 
@@ -423,6 +433,15 @@ public class NinjaController : MonoBehaviour
         }
     }
 
+    private void OnParticleCollision(GameObject other)
+    {
+        if (!invencible)
+        {
+            StartCoroutine(Invencible());
+            vida--;
+        }
+    }
+
 
     void Jump()
     {
@@ -455,6 +474,7 @@ public class NinjaController : MonoBehaviour
 
     IEnumerator Invencible()
     {
+        invencible = true;
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
@@ -462,6 +482,7 @@ public class NinjaController : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
+        invencible = false;
     }
 
     IEnumerator Attack()

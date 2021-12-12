@@ -25,14 +25,13 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.gameObject.layer == 6 || collision.collider.gameObject.layer == 3)
+        if (collision.collider.gameObject.layer == 6 || collision.collider.gameObject.layer == 3 || collision.collider.gameObject.layer == 16)
         {
             gameObject.SetActive(false);
         }
 
         if (collision.collider.gameObject.layer == 7)
         {
-            transform.parent.parent.GetChild(0).GetComponent<NinjaController>().vida--;
             gameObject.SetActive(false);
         }
     }
@@ -50,7 +49,7 @@ public class Bullet : MonoBehaviour
                 }
                 else
                 {
-                    transform.parent.parent.GetComponent<BossBehaviour>().vida--;
+                    transform.parent.parent.GetComponent<BossBehaviour>().escudo--;
                 }
                 gameObject.SetActive(false);
             }

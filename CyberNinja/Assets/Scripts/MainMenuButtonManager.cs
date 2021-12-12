@@ -28,7 +28,7 @@ public class MainMenuButtonManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        selector.transform.position = buttons[position].transform.position + new Vector3(360, 0, 0);
+        selector.transform.position = buttons[position].transform.position + new Vector3(500, 0, 0);
 
         if (Input.GetKeyDown(KeyCode.S))
         {

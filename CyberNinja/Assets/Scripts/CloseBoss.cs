@@ -6,6 +6,7 @@ using Cinemachine;
 public class CloseBoss : MonoBehaviour
 {
     public GameObject bossCameraPoint;
+    public GameObject barraBoss;
 
     public Material OFF;
 
@@ -29,6 +30,7 @@ public class CloseBoss : MonoBehaviour
             doorAnim.SetTrigger("Close");
             boss.start = true;
             camara.Follow = bossCameraPoint.transform;
+            barraBoss.SetActive(true);
         }
     }
 }

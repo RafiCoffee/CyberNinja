@@ -9,8 +9,9 @@ public class BossBehaviour : MonoBehaviour
     public float coolDown;
     public float bulletCoolDown;
 
-    private int comportamientos;
+    public int comportamientos;
     public int vida = 10;
+    public int escudo = 3;
 
     private bool doMelee = false;
     public bool start = false;
@@ -24,11 +25,17 @@ public class BossBehaviour : MonoBehaviour
     public GameObject laserPoint;
     private GameObject cañon;
 
+    public ParticleSystem ChargeLaser1;
+    public ParticleSystem ChargeLaser2;
+    public ParticleSystem Lasersito;
+
     public Slider barraVida;
 
     private Animation bossAnim;
+    private Animator shieldAnim;
 
     public BulletPool bulletPoolScript;
+    private NinjaController playerScript;
 
     private Stopwatch timer = new Stopwatch();
     private Stopwatch bulletTimer = new Stopwatch();
@@ -39,6 +46,8 @@ public class BossBehaviour : MonoBehaviour
         bossAnim = GetComponentInChildren<Animation>();
 
         attackTrigger = GameObject.Find("BossAttackTrigger");
+        playerScript = GameObject.Find("Player").GetComponent<NinjaController>();
+        shieldAnim = GetComponentInChildren<Animator>();
 
         attackTrigger.SetActive(false);
 
@@ -62,7 +71,7 @@ public class BossBehaviour : MonoBehaviour
                 }
                 else
                 {
-                    coolDown = 0.5f;
+                    coolDown = 0.1f;
                     comportamientos = Random.Range(0, 2);
                 }
 
@@ -79,7 +88,10 @@ public class BossBehaviour : MonoBehaviour
                         break;
 
                     case 2:
+                        ChargeLaser1.Play();
+                        ChargeLaser2.Play();
                         bossAnim.Play("rayolaser");
+                        StartCoroutine(Laser());
                         break;
 
                     case 3:
@@ -104,9 +116,28 @@ public class BossBehaviour : MonoBehaviour
                 timer.Restart();
             }
 
+            if (escudo <= 0)
+            {
+                timer.Stop();
+                invencible = false;
+                shieldAnim.SetTrigger("Quit");
+                bossAnim.Play("marico");
+                StartCoroutine(Caida());
+            }
+            else
+            {
+                invencible = true;
+                shieldAnim.SetTrigger("Put");
+            }
+
             if (vida == 0)
             {
                 gameObject.SetActive(false);
+            }
+
+            if (playerScript.vida <= 0)
+            {
+                start = false;
             }
         }
     }
@@ -118,7 +149,6 @@ public class BossBehaviour : MonoBehaviour
             if (!invencible)
             {
                 StartCoroutine(Invencible());
-                vida--;
             }
         }
     }
@@ -155,6 +185,7 @@ public class BossBehaviour : MonoBehaviour
         attackTrigger.SetActive(true);
         yield return new WaitForSeconds(0.5f);
         attackTrigger.SetActive(false);
+        bossAnim.Play("IDLE");
     }
 
     IEnumerator Cabezazo()
@@ -164,6 +195,7 @@ public class BossBehaviour : MonoBehaviour
         attackTrigger.SetActive(true);
         yield return new WaitForSeconds(0.5f);
         attackTrigger.SetActive(false);
+        bossAnim.Play("IDLE");
     }
 
     IEnumerator Invencible()
@@ -176,6 +208,7 @@ public class BossBehaviour : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(false);
         yield return new WaitForSeconds(0.1f);
         transform.GetChild(0).gameObject.SetActive(true);
+        vida--;
         invencible = false;
     }
 
@@ -196,5 +229,24 @@ public class BossBehaviour : MonoBehaviour
             yield return new WaitForSeconds(0.15f);
             Shoot();
         } while (bulletTimer.ElapsedMilliseconds / 1000 < bulletCoolDown);
+        yield return new WaitForSeconds(0.6f);
+        bossAnim.Play("IDLE");
+    }
+
+    IEnumerator Laser()
+    {
+        yield return new WaitForSeconds(1f);
+        Lasersito.Play();
+        yield return new WaitForSeconds(0.6f);
+        Lasersito.Stop();
+        bossAnim.Play("IDLE");
+    }
+
+    IEnumerator Caida()
+    {
+        yield return new WaitForSeconds(5f);
+        timer.Restart();
+        escudo = 3;
+        bossAnim.Play("IDLE");
     }
 }

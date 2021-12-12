@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2932447339890590975}
   - component: {fileID: 2242228311138290522}
   - component: {fileID: 4105323036732309392}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: KeyCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}

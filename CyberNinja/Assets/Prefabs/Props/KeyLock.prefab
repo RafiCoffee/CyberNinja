@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5422376781506316638}
   - component: {fileID: 9002692774969837307}
   - component: {fileID: 6560348451259642417}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: KeyLock_Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -111,7 +111,7 @@ GameObject:
   - component: {fileID: 6873910303814343605}
   - component: {fileID: 6497709388721276440}
   - component: {fileID: 7617838411738468552}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: KeyLock
   m_TagString: Untagged
   m_Icon: {fileID: 0}

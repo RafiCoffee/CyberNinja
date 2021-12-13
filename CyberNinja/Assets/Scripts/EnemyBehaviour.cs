@@ -6,8 +6,6 @@ using UDebug = UnityEngine.Debug;
 
 public class EnemyBehaviour : MonoBehaviour
 {
-    private Vector2 followPlayer;
-
     public int vida;
 
     public float coolDown;
@@ -21,20 +19,22 @@ public class EnemyBehaviour : MonoBehaviour
     public GameObject spine;
     public GameObject cañon;
 
+    public AudioClip bulletClip;
+
     public Animator enemyAnim;
     public Animator shieldAnim;
+    private AudioSource enemyAudio;
 
     private Stopwatch timer = new Stopwatch();
 
-    private BulletPool bulletPoolScript;
+    public BulletPool bulletPoolScript;
 
     // Start is called before the first frame update
     void Start()
     {
         player = GameObject.Find("EnemyPoint");
-        bulletPoolScript = GetComponentInChildren<BulletPool>();
+        enemyAudio = GetComponent<AudioSource>();
 
-        followPlayer = player.transform.position - transform.position;
         canShoot = false;
 
         timer.Start();
@@ -43,8 +43,6 @@ public class EnemyBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        enemyAnim.SetBool("CanShoot", canShoot);
-
         if (canShoot)
         {
             enemyAnim.SetLayerWeight(1, 1);

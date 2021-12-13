@@ -12,6 +12,7 @@ public class BossBehaviour : MonoBehaviour
     public int comportamientos;
     public int vida = 10;
     public int escudo = 3;
+    private int escudito;
 
     private bool doMelee = false;
     public bool start = false;
@@ -31,8 +32,17 @@ public class BossBehaviour : MonoBehaviour
 
     public Slider barraVida;
 
+    public AudioClip shieldInterference;
+    public AudioClip shieldQuit;
+    public AudioClip bulletClip;
+    public AudioClip chargeBeam;
+    public AudioClip beam;
+    public AudioClip pisotonClip;
+    public AudioClip cabezazoClip;
+
     private Animation bossAnim;
     private Animator shieldAnim;
+    private AudioSource bossAudio;
 
     public BulletPool bulletPoolScript;
     private NinjaController playerScript;
@@ -48,8 +58,11 @@ public class BossBehaviour : MonoBehaviour
         attackTrigger = GameObject.Find("BossAttackTrigger");
         playerScript = GameObject.Find("Player").GetComponent<NinjaController>();
         shieldAnim = GetComponentInChildren<Animator>();
+        bossAudio = GetComponent<AudioSource>();
 
         attackTrigger.SetActive(false);
+
+        escudito = escudo;
 
         timer.Start();
         bulletTimer.Start();
@@ -78,11 +91,13 @@ public class BossBehaviour : MonoBehaviour
                 switch (comportamientos)
                 {
                     case 0:
+                        bossAudio.PlayOneShot(cabezazoClip, 1f);
                         bossAnim.Play("cabezazo2");
                         StartCoroutine(Cabezazo());
                         break;
 
                     case 1:
+                        bossAudio.PlayOneShot(pisotonClip, 1f);
                         bossAnim.Play("pisoton");
                         StartCoroutine(Pisoton());
                         break;
@@ -118,6 +133,7 @@ public class BossBehaviour : MonoBehaviour
 
             if (escudo <= 0)
             {
+                bossAudio.PlayOneShot(shieldQuit, 1f);
                 timer.Stop();
                 invencible = false;
                 shieldAnim.SetTrigger("Quit");
@@ -126,6 +142,10 @@ public class BossBehaviour : MonoBehaviour
             }
             else
             {
+                if (escudo < escudito)
+                {
+                    StartCoroutine(ParpadeoEscudo());
+                }
                 invencible = true;
                 shieldAnim.SetTrigger("Put");
             }
@@ -171,6 +191,7 @@ public class BossBehaviour : MonoBehaviour
 
     void Shoot()
     {
+        bossAudio.PlayOneShot(bulletClip, 1f);
         bullet = bulletPoolScript.GetPooledObject();
         bullet.transform.position = cañon.transform.position;
         bullet.transform.rotation = cañon.transform.rotation;
@@ -235,7 +256,9 @@ public class BossBehaviour : MonoBehaviour
 
     IEnumerator Laser()
     {
+        bossAudio.PlayOneShot(chargeBeam, 1f);
         yield return new WaitForSeconds(1f);
+        bossAudio.PlayOneShot(beam, 1f);
         Lasersito.Play();
         yield return new WaitForSeconds(0.6f);
         Lasersito.Stop();
@@ -244,9 +267,19 @@ public class BossBehaviour : MonoBehaviour
 
     IEnumerator Caida()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(2f);
         timer.Restart();
         escudo = 3;
+        escudito = escudo;
         bossAnim.Play("IDLE");
+    }
+
+    IEnumerator ParpadeoEscudo()
+    {
+        bossAudio.PlayOneShot(shieldInterference, 0.2f);
+        transform.GetChild(3).gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.2f);
+        transform.GetChild(3).gameObject.SetActive(true);
+        escudito = escudo;
     }
 }

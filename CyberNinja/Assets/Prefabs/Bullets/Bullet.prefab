@@ -74,6 +74,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 10
   boss: 0
+  hitParticle: {fileID: 2264722616375182606, guid: f9f6aa391772c2b4c860322f624d4f0c, type: 3}
 --- !u!1 &7874180382483165257
 GameObject:
   m_ObjectHideFlags: 0

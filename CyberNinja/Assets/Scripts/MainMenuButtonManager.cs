@@ -14,12 +14,16 @@ public class MainMenuButtonManager : MonoBehaviour
     private int minPosition;
     private int maxPosition;
 
-    private MainMenuManager menuManagerScript;
+    public bool escenario;
+
+    public AudioClip botones;
+
+    private AudioSource menu;
 
     // Start is called before the first frame update
     void Start()
     {
-        menuManagerScript = GameObject.Find("MainMenuManager").GetComponent<MainMenuManager>();
+        menu = GetComponent<AudioSource>();
 
         minPosition = 0;
         maxPosition = buttons.Length - 1;
@@ -32,6 +36,7 @@ public class MainMenuButtonManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.S))
         {
+            menu.PlayOneShot(botones, 1f);
             if (position == maxPosition)
             {
                 position = minPosition;
@@ -44,6 +49,7 @@ public class MainMenuButtonManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W))
         {
+            menu.PlayOneShot(botones, 1f);
             if (position == minPosition)
             {
                 position = maxPosition;
@@ -56,21 +62,41 @@ public class MainMenuButtonManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
+            menu.PlayOneShot(botones, 1f);
             MainMenu();
         }
     }
 
     public void MainMenu()
     {
-        switch (position)
+        if (escenario)
         {
-            case 0:
-                SceneManager.LoadScene("Pruebas");
-                break;
+            switch (position)
+            {
+                case 0:
+                    SceneManager.LoadScene(1);
+                    Time.timeScale = 1;
+                    break;
 
-            case 1:
-                Application.Quit();
-                break;
+                case 1:
+                    SceneManager.LoadScene(0);
+                    Time.timeScale = 1;
+                    break;
+            }
+        }
+        else
+        {
+            switch (position)
+            {
+                case 0:
+                    SceneManager.LoadScene(1);
+                    Time.timeScale = 1;
+                    break;
+
+                case 1:
+                    Application.Quit();
+                    break;
+            }
         }
     }
 }

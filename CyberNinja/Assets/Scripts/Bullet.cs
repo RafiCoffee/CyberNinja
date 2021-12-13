@@ -9,6 +9,8 @@ public class Bullet : MonoBehaviour
 
     public bool boss;
 
+    public GameObject hitParticle;
+
     private NinjaController playerScript;
 
     // Start is called before the first frame update
@@ -28,11 +30,13 @@ public class Bullet : MonoBehaviour
         if (collision.collider.gameObject.layer == 6 || collision.collider.gameObject.layer == 3 || collision.collider.gameObject.layer == 16)
         {
             gameObject.SetActive(false);
+            Instantiate(hitParticle, transform.position, Quaternion.identity);
         }
 
         if (collision.collider.gameObject.layer == 7)
         {
             gameObject.SetActive(false);
+            Instantiate(hitParticle, transform.position, Quaternion.identity);
         }
     }
 
@@ -42,21 +46,22 @@ public class Bullet : MonoBehaviour
         {
             if (playerScript.canReturn)
             {
-                Debug.Log("Devuelto");
                 if (!boss)
                 {
                     transform.parent.parent.GetChild(0).GetComponent<EnemyBehaviour>().vida--;
+                    Instantiate(hitParticle, transform.parent.parent.position, Quaternion.identity);
                 }
                 else
                 {
                     transform.parent.parent.GetComponent<BossBehaviour>().escudo--;
+                    Instantiate(hitParticle, transform.parent.parent.GetComponent<BossBehaviour>().laserPoint.transform.position, Quaternion.identity);
                 }
                 gameObject.SetActive(false);
             }
             else
             {
-                Debug.Log("No Devuelto");
                 gameObject.SetActive(false);
+                Instantiate(hitParticle, transform.position, Quaternion.identity);
             }
         }
     }

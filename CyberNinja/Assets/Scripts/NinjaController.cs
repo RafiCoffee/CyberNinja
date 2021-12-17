@@ -16,6 +16,7 @@ public class NinjaController : MonoBehaviour
     float jumpForce = 10f;
 
     private Vector2 movementInput;
+    private Vector2 wallInput;
     private Vector2 movement;
     private Vector2 dashInput;
     private Vector2 attackInput;
@@ -37,7 +38,7 @@ public class NinjaController : MonoBehaviour
     private float startGravity;
     public float blockCoolDown;
 
-    public bool canMove;
+    public bool canMoveInGame;
     private bool jump;
     private bool canWallJump = false;
     private bool isOnGroundWall = false;
@@ -52,6 +53,7 @@ public class NinjaController : MonoBehaviour
     public bool wallRight = false;
     private bool invencible = false;
     public bool haveKey = false;
+    private bool cantMove;
 
     public GameObject attackTrigger;
     public GameObject blockTrigger;
@@ -107,188 +109,203 @@ public class NinjaController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        movementAnim = Input.GetAxisRaw("Horizontal");
-        movementInput.x = Input.GetAxis("Horizontal");
-        dashInput.x = Input.GetAxisRaw("Horizontal");
-
-        barraVida.value = vida;
-
-        if (dashCount == 0)
+        if (!cantMove)
         {
-            eyeR.colorGradient = ojos;
-            eyeI.colorGradient = ojos;
-        }
-        else
-        {
-            eyeR.colorGradient = ojosD;
-            eyeI.colorGradient = ojosD;
-        }
+            movementAnim = Input.GetAxisRaw("Horizontal");
+            wallInput.x = Input.GetAxis("Horizontal");
+            dashInput.x = Input.GetAxisRaw("Horizontal");
 
-        if (dashInput.x == 0)
-        {
-            dash = false;
-        }
+            barraVida.value = vida;
 
-        if (!canWallJump)
-        {
-            if (!isAttacking)
+            if (dashCount == 0)
             {
-                attackInput.x = Input.GetAxisRaw("Horizontal");
-                attackInput.y = Input.GetAxisRaw("Vertical");
+                eyeR.colorGradient = ojos;
+                eyeI.colorGradient = ojos;
             }
             else
             {
-                playerRotation = transform.GetChild(0).rotation;
-                transform.GetChild(0).rotation = playerRotation;
+                eyeR.colorGradient = ojosD;
+                eyeI.colorGradient = ojosD;
             }
 
-            if (!isBlocking)
+            if (dashInput.x == 0)
             {
-                blockInput.x = Input.GetAxisRaw("Horizontal");
+                dash = false;
             }
-            else
+
+            if (Input.GetKeyDown(KeyCode.J) && !isBlocking && !isAttacking)
             {
-                playerRotation = transform.GetChild(0).rotation;
-                transform.GetChild(0).rotation = playerRotation;
+                StartCoroutine(Attack());
             }
 
-            if (isOnGround)
+            if (Input.GetKeyDown(KeyCode.L) && !isAttacking && !isBlocking && blockTimer.ElapsedMilliseconds / 1000 >= blockCoolDown)
             {
-                jump |= Input.GetKeyDown(KeyCode.Space);
-                wallDust.Stop();
+                StartCoroutine(Block());
             }
 
-        }
-
-        if (Input.GetKeyDown(KeyCode.J) && !isBlocking && !isAttacking)
-        {
-            StartCoroutine(Attack());
-        }
-
-        if (Input.GetKeyDown(KeyCode.L) && !isAttacking && !isBlocking && blockTimer.ElapsedMilliseconds / 1000 >= blockCoolDown)
-        {
-            StartCoroutine(Block());
-        }
-
-        if (isBlocking)
-        {
-            gameObject.layer = 14;
-        }
-        else
-        {
-            gameObject.layer = 7;
-        }
-
-        playerAnim.SetBool("Wall", canWallJump);
-        playerAnim.SetFloat("Blend", attackCount);
-
-        if (canMove)
-        {
-            playerAnim.SetInteger("Movement", (int)movementAnim);
-            playerAnim.SetBool("Ground", isOnGround);
-
-            if (wallLeft && isOnGroundWall)
-            {
-                transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
-            }
-            else if (wallRight && isOnGroundWall)
-            {
-                transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
-            }
-
-            if (movementInput.x == 0)
-            {
-                playerAnim.SetLayerWeight(1, 0);
-            }
-            else
-            {
-                playerAnim.SetLayerWeight(1, 1);
-            }
-
-            if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1) && attackInput != Vector2.up)
-            {
-                if (attackInput.y == -1 && !isOnGround)
-                {
-                    transform.GetChild(1).localScale = new Vector2 (4, 2);
-                    transform.GetChild(1).localPosition = attackInput;
-                }
-                else if (attackInput == Vector2.right || attackInput == Vector2.left)
-                {
-                    transform.GetChild(1).localScale = new Vector2(2, 4);
-                    transform.GetChild(1).localPosition = attackInput * 1.5f;
-                }
-            }
-
-            if (blockInput != Vector2.zero)
-            {
-                transform.GetChild(2).localPosition = blockInput * 1.2f;
-            }
-
-            if (isDashing && !canWallJump)
+            if (isBlocking)
             {
                 gameObject.layer = 14;
-                dashTime -= Time.deltaTime;
-                if (dashTime <= 0)
-                {
-                    gameObject.layer = 7;
-                    playerRb2D.gravityScale = startGravity;
-                    dashTime = startDashTime;
-                    isDashing = false;
-                }
             }
-            else if (!isDashing)
+            else
             {
-                if (movementInput.x != 0)
-                {
-                    dash |= Input.GetKeyDown(KeyCode.K);
-                }
-                movement = movementInput * maxSpeed;
+                gameObject.layer = 7;
             }
 
-            if (canWallJump && !isOnGroundWall)
+            if (!canWallJump)
             {
-                if (wallJump.x > 0)
+                movementInput.x = Input.GetAxis("Horizontal");
+
+                if (!isAttacking)
                 {
-                    transform.GetChild(0).rotation = Quaternion.Euler(0, 180, 0);
-                    playerAnim.SetTrigger("Wall D");
-                }
-                else if (wallJump.x < 0)
-                {
-                    transform.GetChild(0).rotation = Quaternion.Euler(0, 360, 0);
-                    Debug.Log("casi");
-                    playerAnim.SetTrigger("Wall I");
-                }
-                attackInput.x = wallJump.x;
-                blockInput.x = wallJump.x;
-                dash = false;
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    playerAnim.SetTrigger("Jump");
-                    wallDust.Stop();
-                    canMove = false;
-                    playerRb2D.AddForce(wallJump * jumpForce / 1.5f, ForceMode2D.Impulse);
-                    canWallJump = false;
-                    if (wallJump.x > 0)
-                    {
-                        transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
-                    }
-                    else if (wallJump.x > 0)
-                    {
-                        transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
-                        Debug.Log("casi");
-                    }
-                }
-                if (movementInput.x == 0)
-                {
-                    wallDust.Play();
+                    attackInput.x = Input.GetAxisRaw("Horizontal");
+                    attackInput.y = Input.GetAxisRaw("Vertical");
                 }
                 else
                 {
+                    playerRotation = transform.GetChild(0).rotation;
+                    transform.GetChild(0).rotation = playerRotation;
+                }
+
+                if (!isBlocking)
+                {
+                    blockInput.x = Input.GetAxisRaw("Horizontal");
+                }
+                else
+                {
+                    playerRotation = transform.GetChild(0).rotation;
+                    transform.GetChild(0).rotation = playerRotation;
+                }
+
+                if (isOnGround)
+                {
+                    jump |= Input.GetKeyDown(KeyCode.Space);
                     wallDust.Stop();
                 }
             }
-            else if (!canWallJump && !isAttacking && !isBlocking)
+            else
             {
+                if (isOnGroundWall)
+                {
+                    movementInput.x = Input.GetAxis("Horizontal");
+                }
+                else
+                {
+                    if (wallInput.x == 0.6f || wallInput.x == -0.6f)
+                    {
+                        movementInput.x = wallInput.x;
+                    }
+                }
+            }
+
+            playerAnim.SetBool("Wall", canWallJump);
+            playerAnim.SetFloat("Blend", attackCount);
+
+            if (canMoveInGame)
+            {
+                playerAnim.SetInteger("Movement", (int)movementAnim);
+                playerAnim.SetBool("Ground", isOnGround);
+
+                if (wallLeft && isOnGroundWall)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+                }
+                else if (wallRight && isOnGroundWall)
+                {
+                    transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+                }
+
+                if (movementInput.x == 0)
+                {
+                    playerAnim.SetLayerWeight(1, 0);
+                }
+                else
+                {
+                    playerAnim.SetLayerWeight(1, 1);
+                }
+
+                if (attackInput != Vector2.zero && attackInput != Vector2.one && attackInput != -Vector2.one && attackInput != new Vector2(1, -1) && attackInput != new Vector2(-1, 1) && attackInput != Vector2.up)
+                {
+                    if (attackInput.y == -1 && !isOnGround)
+                    {
+                        transform.GetChild(1).localScale = new Vector2(4, 2);
+                        transform.GetChild(1).localPosition = attackInput;
+                    }
+                    else if (attackInput == Vector2.right || attackInput == Vector2.left)
+                    {
+                        transform.GetChild(1).localScale = new Vector2(2, 4);
+                        transform.GetChild(1).localPosition = attackInput * 1.5f;
+                    }
+                }
+
+                if (blockInput != Vector2.zero)
+                {
+                    transform.GetChild(2).localPosition = blockInput * 1.2f;
+                }
+
+                if (isDashing && !canWallJump)
+                {
+                    gameObject.layer = 14;
+                    dashTime -= Time.deltaTime;
+                    if (dashTime <= 0)
+                    {
+                        gameObject.layer = 7;
+                        playerRb2D.gravityScale = startGravity;
+                        dashTime = startDashTime;
+                        isDashing = false;
+                    }
+                }
+                else if (!isDashing)
+                {
+                    if (movementInput.x != 0)
+                    {
+                        dash |= Input.GetKeyDown(KeyCode.K);
+                    }
+                    movement = movementInput * maxSpeed;
+                }
+
+                if (canWallJump && !isOnGroundWall)
+                {
+                    if (wallJump.x > 0)
+                    {
+                        transform.GetChild(0).rotation = Quaternion.Euler(0, 180, 0);
+                        playerAnim.SetTrigger("Wall D");
+                    }
+                    else if (wallJump.x < 0)
+                    {
+                        transform.GetChild(0).rotation = Quaternion.Euler(0, 360, 0);
+                        playerAnim.SetTrigger("Wall I");
+                    }
+                    attackInput.x = wallJump.x;
+                    blockInput.x = wallJump.x;
+                    dash = false;
+                    if (Input.GetKeyDown(KeyCode.Space))
+                    {
+                        playerAnim.SetTrigger("Jump");
+                        wallDust.Stop();
+                        canMoveInGame = false;
+                        playerRb2D.AddForce(wallJump * jumpForce / 1.5f, ForceMode2D.Impulse);
+                        canWallJump = false;
+                        if (wallJump.x > 0)
+                        {
+                            transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+                        }
+                        else if (wallJump.x > 0)
+                        {
+                            transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+                        }
+                    }
+                    if (movementInput.x == 0)
+                    {
+                        wallDust.Play();
+                    }
+                    else
+                    {
+                        wallDust.Stop();
+                    }
+                }
+                else if (!canWallJump && !isAttacking && !isBlocking && canMoveInGame)
+                {
                     if (movementInput.x > 0)
                     {
                         transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
@@ -297,31 +314,37 @@ public class NinjaController : MonoBehaviour
                     {
                         transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
                     }
+                }
             }
-        }
-        else
-        {
-            if (movementInput.x != 0)
+            else
             {
-                dash |= Input.GetKeyDown(KeyCode.K);
+                if (movementInput.x != 0)
+                {
+                    dash |= Input.GetKeyDown(KeyCode.K);
+                }
+            }
+
+            if (isOnGroundWall)
+            {
+                playerRb2D.gravityScale = startGravity;
+                wallDust.Stop();
+            }
+
+            if (vida == 0)
+            {
+                gameObject.SetActive(false);
             }
         }
 
-        if (isOnGroundWall)
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            playerRb2D.gravityScale = startGravity;
-            wallDust.Stop();
-        }
-
-        if (vida == 0)
-        {
-            gameObject.SetActive(false);
+            Debug.Log(playerRb2D.velocity);
         }
     }
 
     void FixedUpdate()
     {
-        if (canMove)
+        if (canMoveInGame)
         {
             if (jump && isOnGround)
             {
@@ -341,7 +364,7 @@ public class NinjaController : MonoBehaviour
         {
             if (dash && dashInput != Vector2.zero && dashCount != 0)
             {
-                canMove = true;
+                canMoveInGame = true;
                 dash = false;
                 Dash();
             }
@@ -355,7 +378,7 @@ public class NinjaController : MonoBehaviour
             dashCount = maxDashCount;
             playerRb2D.gravityScale = startGravity;
             isOnGround = true;
-            canMove = true;
+            canMoveInGame = true;
             katana.SetActive(true);
         }
 
@@ -385,7 +408,7 @@ public class NinjaController : MonoBehaviour
 
         if (collision.collider.gameObject.layer == 6 && isOnGround == false)
         {
-            canMove = true;
+            canMoveInGame = true;
         }
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
@@ -536,10 +559,10 @@ public class NinjaController : MonoBehaviour
     IEnumerator DontMove()
     {
         playerRb2D.gravityScale = startGravity;
-        canMove = false;
+        canMoveInGame = false;
         isDashing = false;
         yield return new WaitForSeconds(0.4f);
-        canMove = true;
+        canMoveInGame = true;
     }
 
     IEnumerator Invencible()
@@ -609,5 +632,15 @@ public class NinjaController : MonoBehaviour
         isBlocking = false;
         blockTrigger.SetActive(false);
         blockTimer.Restart();
+    }
+
+    public void NotMove()
+    {
+        cantMove = true;
+    }
+
+    public void StartMove()
+    {
+        cantMove = false;
     }
 }

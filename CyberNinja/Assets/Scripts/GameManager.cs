@@ -47,8 +47,6 @@ public class GameManager : MonoBehaviour
 
             player = GameObject.Find("Player");
 
-            Debug.Log(spawnPlayer);
-
             player.transform.position = spawnPlayer;
         }
     }

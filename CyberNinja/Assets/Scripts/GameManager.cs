@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public bool isStatic;
     private bool isPaused = false;
     private bool cannotPause = false;
+    public bool firstTime;
 
     private GameObject player;
     private GameObject pause;
@@ -64,6 +65,10 @@ public class GameManager : MonoBehaviour
             pause = GameObject.Find("Pause");
 
             pause.SetActive(false);
+        }
+        else
+        {
+            firstTime = true;
         }
     }
 

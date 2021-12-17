@@ -438,6 +438,11 @@ public class NinjaController : MonoBehaviour
                 }
             }
         }
+
+        if (collision.gameObject.layer == 18)
+        {
+            vida = 0;
+        }
     }
 
     private void OnCollisionStay2D(Collision2D collision)

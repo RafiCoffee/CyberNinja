@@ -42,7 +42,8 @@ public class NinjaController : MonoBehaviour
     private bool jump;
     private bool canWallJump = false;
     private bool isOnGroundWall = false;
-    public bool isOnGround;
+    private bool fromGroundWall = false;
+    private bool isOnGround;
     private bool dash;
     private bool isDashing = false;
     public bool isAttacking = false;
@@ -57,12 +58,12 @@ public class NinjaController : MonoBehaviour
 
     public GameObject attackTrigger;
     public GameObject blockTrigger;
+    public GameObject katanaHitParticleCollider;
     public GameObject katana;
 
     public Slider barraVida;
 
     public ParticleSystem wallDust;
-    public ParticleSystem hitParticle;
 
     public TrailRenderer eyeR;
     public TrailRenderer eyeI;
@@ -70,7 +71,6 @@ public class NinjaController : MonoBehaviour
     public Gradient ojosD;
     public Gradient ojos;
 
-    public AudioClip katanaHit;
     public AudioClip katanaAirHit;
     public AudioClip dashClip;
     public AudioClip daño1;
@@ -181,6 +181,7 @@ public class NinjaController : MonoBehaviour
                 {
                     jump |= Input.GetKeyDown(KeyCode.Space);
                     wallDust.Stop();
+                    fromGroundWall = false;
                 }
             }
             else
@@ -228,13 +229,14 @@ public class NinjaController : MonoBehaviour
                 {
                     if (attackInput.y == -1 && !isOnGround)
                     {
-                        transform.GetChild(1).localScale = new Vector2(4, 2);
+                        transform.GetChild(1).localScale = new Vector2(4, 3);
                         transform.GetChild(1).localPosition = attackInput;
                     }
                     else if (attackInput == Vector2.right || attackInput == Vector2.left)
                     {
-                        transform.GetChild(1).localScale = new Vector2(2, 4);
-                        transform.GetChild(1).localPosition = attackInput * 1.5f;
+                        transform.GetChild(1).localScale = new Vector2(3, 4);
+                        transform.GetChild(1).localPosition = attackInput * 2;
+                        transform.GetChild(4).localPosition = attackInput * 2;
                     }
                 }
 
@@ -266,6 +268,9 @@ public class NinjaController : MonoBehaviour
 
                 if (canWallJump && !isOnGroundWall)
                 {
+                    isAttacking = true;
+                    isBlocking = true;
+                    wallDust.Play();
                     if (wallJump.x > 0)
                     {
                         transform.GetChild(0).rotation = Quaternion.Euler(0, 180, 0);
@@ -295,14 +300,6 @@ public class NinjaController : MonoBehaviour
                             transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
                         }
                     }
-                    if (movementInput.x == 0)
-                    {
-                        wallDust.Play();
-                    }
-                    else
-                    {
-                        wallDust.Stop();
-                    }
                 }
                 else if (!canWallJump && !isAttacking && !isBlocking && canMoveInGame)
                 {
@@ -328,6 +325,10 @@ public class NinjaController : MonoBehaviour
             {
                 playerRb2D.gravityScale = startGravity;
                 wallDust.Stop();
+                if (jump)
+                {
+                    fromGroundWall = true;
+                }
             }
 
             if (vida == 0)
@@ -380,6 +381,14 @@ public class NinjaController : MonoBehaviour
             isOnGround = true;
             canMoveInGame = true;
             katana.SetActive(true);
+            if (wallRight)
+            {
+                transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+            }
+            else if (wallLeft)
+            {
+                transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+            }
         }
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 8 || gameObject.layer == 7 && collision.collider.gameObject.layer == 12 || gameObject.layer == 7 && collision.collider.gameObject.layer == 13)
@@ -406,9 +415,10 @@ public class NinjaController : MonoBehaviour
             playerRb2D.AddForce(collisionRecoil * jumpForce / 2f, ForceMode2D.Impulse);
         }
 
-        if (collision.collider.gameObject.layer == 6 && isOnGround == false)
+        if (collision.collider.gameObject.layer == 6 && isOnGround == false && fromGroundWall == false)
         {
             canMoveInGame = true;
+            playerRb2D.velocity = Vector2.zero;
         }
 
         if (gameObject.layer == 7 && collision.collider.gameObject.layer == 11)
@@ -430,18 +440,6 @@ public class NinjaController : MonoBehaviour
             playerRb2D.velocity = Vector2.zero;
             playerRb2D.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             playerAnim.SetTrigger("SaltoEnemy");
-        }
-
-        if (isAttacking)
-        {
-            if (transform.GetChild(1).gameObject.layer == 9)
-            {
-                if (collision.gameObject.layer != 0 && collision.gameObject.layer != 7 && collision.gameObject.layer != 9 && collision.gameObject.layer != 10 && collision.gameObject.layer != 15 && collision.gameObject.layer != 17)
-                {
-                    playerAudio.PlayOneShot(katanaHit, 0.5f);
-                    hitParticle.Play();
-                }
-            }
         }
 
         if (isBlocking)
@@ -477,10 +475,10 @@ public class NinjaController : MonoBehaviour
             isOnGround = true;
         }
 
-        if (collision.collider.gameObject.layer == 6 && isOnGround == false)
+        if (collision.collider.gameObject.layer == 6 && isOnGround == false && fromGroundWall == false)
         {
             dashCount = maxDashCount;
-            playerRb2D.gravityScale = 1;
+            playerRb2D.gravityScale = 0.2f;
             wallJump = collision.GetContact(0).normal + Vector2.up;
             canWallJump = true;
             katana.SetActive(false);
@@ -514,12 +512,20 @@ public class NinjaController : MonoBehaviour
         if (collision.collider.gameObject.layer == 6)
         {
             playerRb2D.gravityScale = startGravity;
-            wallLeft = false;
-            wallRight = false;
             canWallJump = false;
             isDashing = false;
             isOnGroundWall = false;
             katana.SetActive(true);
+            isAttacking = false;
+            isBlocking = false;
+            if (wallRight)
+            {
+                transform.GetChild(0).rotation = Quaternion.Euler(0, -90, 0);
+            }
+            else if (wallLeft)
+            {
+                transform.GetChild(0).rotation = Quaternion.Euler(0, 90, 0);
+            }
         }
     }
 
@@ -614,9 +620,11 @@ public class NinjaController : MonoBehaviour
         }
         isAttacking = true;
         attackTrigger.SetActive(true);
+        katanaHitParticleCollider.SetActive(true);
         yield return new WaitForSeconds(0.25f);
         isAttacking = false;
         attackTrigger.SetActive(false);
+        katanaHitParticleCollider.SetActive(false);
     }
 
     IEnumerator Block()
@@ -642,5 +650,15 @@ public class NinjaController : MonoBehaviour
     public void StartMove()
     {
         cantMove = false;
+    }
+
+    public void NoSword()
+    {
+        katana.SetActive(false);
+    }
+
+    public void Sword()
+    {
+        katana.SetActive(true);
     }
 }

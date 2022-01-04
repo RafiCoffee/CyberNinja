@@ -13,7 +13,11 @@ public class Bullet : MonoBehaviour
 
     private NinjaController playerScript;
 
-    // Start is called before the first frame update
+    private void OnEnable()
+    {
+        StartCoroutine(Destruir());
+    }
+
     void Start()
     {
         playerScript = GameObject.Find("Player").GetComponent<NinjaController>();
@@ -64,5 +68,11 @@ public class Bullet : MonoBehaviour
                 Instantiate(hitParticle, transform.position, Quaternion.identity);
             }
         }
+    }
+
+    IEnumerator Destruir()
+    {
+        yield return new WaitForSeconds(2);
+        gameObject.SetActive(false);
     }
 }

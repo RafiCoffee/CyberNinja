@@ -1066,6 +1066,79 @@ Transform:
   m_Father: {fileID: 3975661523006412714}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2493879927052088865
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2268619546189110660}
+  - component: {fileID: 7428259983470625380}
+  - component: {fileID: 4913080401018945783}
+  m_Layer: 19
+  m_Name: KatanaHitParticleCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2268619546189110660
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493879927052088865}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.5, y: 0, z: 0}
+  m_LocalScale: {x: 3, y: 4, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2773978997863415975}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &7428259983470625380
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493879927052088865}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
+--- !u!114 &4913080401018945783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2493879927052088865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4735a3e1caeb0f64da82fbaf520f78b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitParticle: {fileID: 0}
+  katanaHit: {fileID: 0}
+  enemies: 0
 --- !u!1 &2519544513351278016
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,6 +1324,7 @@ Transform:
   - {fileID: 2773978998529728712}
   - {fileID: 2773978998435385815}
   - {fileID: 2773978998806913419}
+  - {fileID: 2268619546189110660}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1321,19 +1395,20 @@ MonoBehaviour:
   vida: 8
   startDashTime: 0.2
   blockCoolDown: 0
-  canMove: 1
+  canMoveInGame: 0
   isAttacking: 0
   isBlocking: 0
   canReturn: 0
   bulletOnBack: 0
   wallLeft: 0
   wallRight: 0
+  haveKey: 0
   attackTrigger: {fileID: 2773978998529728719}
   blockTrigger: {fileID: 2773978998435385814}
+  katanaHitParticleCollider: {fileID: 2493879927052088865}
   katana: {fileID: 8631794140384403532}
   barraVida: {fileID: 0}
   wallDust: {fileID: 4875653649480708205}
-  hitParticle: {fileID: 4023616304663303136}
   eyeR: {fileID: 5614148305101664052}
   eyeI: {fileID: 5614148304165064906}
   ojosD:
@@ -1394,7 +1469,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  katanaHit: {fileID: 0}
   katanaAirHit: {fileID: 0}
   dashClip: {fileID: 0}
   "da\xF1o1": {fileID: 0}
@@ -1596,6 +1670,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2773978998529728712}
   - component: {fileID: 2773978998529728713}
+  - component: {fileID: 8358237680517508566}
   m_Layer: 9
   m_Name: AttackCollider
   m_TagString: Untagged
@@ -1643,6 +1718,21 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &8358237680517508566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2773978998529728719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4735a3e1caeb0f64da82fbaf520f78b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitParticle: {fileID: 2264722616375182604, guid: 33f0e26093341444e8d522ec55a7b72b, type: 3}
+  katanaHit: {fileID: 8300000, guid: 61706de5de0b2d54e9829fa16dbef72e, type: 3}
+  enemies: 1
 --- !u!1 &2773978998806913418
 GameObject:
   m_ObjectHideFlags: 0
@@ -5753,14 +5843,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a4b99af4254fe6488721610d257c2da, type: 3}
---- !u!96 &5614148305101664052 stripped
-TrailRenderer:
-  m_CorrespondingSourceObject: {fileID: 7752472940093510481, guid: 2a4b99af4254fe6488721610d257c2da, type: 3}
-  m_PrefabInstance: {fileID: 2773978999723408485}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5614148305101664059 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7752472940093510494, guid: 2a4b99af4254fe6488721610d257c2da, type: 3}
+  m_PrefabInstance: {fileID: 2773978999723408485}
+  m_PrefabAsset: {fileID: 0}
+--- !u!96 &5614148305101664052 stripped
+TrailRenderer:
+  m_CorrespondingSourceObject: {fileID: 7752472940093510481, guid: 2a4b99af4254fe6488721610d257c2da, type: 3}
   m_PrefabInstance: {fileID: 2773978999723408485}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2934984174395397868
@@ -5844,11 +5934,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 33f0e26093341444e8d522ec55a7b72b, type: 3}
---- !u!198 &4023616304663303136 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 2264722616375182604, guid: 33f0e26093341444e8d522ec55a7b72b, type: 3}
-  m_PrefabInstance: {fileID: 2934984174395397868}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4699092270041563516
 PrefabInstance:
   m_ObjectHideFlags: 0

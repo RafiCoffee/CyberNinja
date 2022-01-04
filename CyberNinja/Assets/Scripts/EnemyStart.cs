@@ -7,6 +7,7 @@ public class EnemyStart : MonoBehaviour
     [SerializeField, Range(0f, 10f)]
     float speed = 5f;
 
+    public bool ceroZ;
     public bool isOnRadious = false;
 
     public Animator enemyAnim;
@@ -25,6 +26,7 @@ public class EnemyStart : MonoBehaviour
     {
         if (transform.position.z > 0)
         {
+            ceroZ = false;
             transform.rotation = Quaternion.Euler(0, -90, 0);
             transform.position = Vector3.MoveTowards(transform.position, new Vector3 (transform.position.x, transform.position.y, 0), speed * Time.deltaTime);
         }
@@ -32,13 +34,14 @@ public class EnemyStart : MonoBehaviour
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
             enemyBC.enabled = true;
+            ceroZ = true;
             if (isOnRadious)
             {
                 transform.GetChild(0).GetComponent<EnemyBehaviour>().canShoot = true;
             }
         }
 
-        enemyAnim.SetBool("CanShoot", isOnRadious);
+        enemyAnim.SetBool("CanShoot", ceroZ);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

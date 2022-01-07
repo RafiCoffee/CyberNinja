@@ -100,7 +100,7 @@ public class NinjaController : MonoBehaviour
 
         blockTimer.Start();
 
-        if (transform.position == new Vector3(85.1399994f, 36.8185539f, 0) || transform.position == new Vector3(90.140007f, 31.7885513f, 0))
+        if (transform.position.y > 30)
         {
             haveKey = true;
         }
@@ -245,15 +245,22 @@ public class NinjaController : MonoBehaviour
                     transform.GetChild(2).localPosition = blockInput * 1.2f;
                 }
 
-                if (isDashing && !canWallJump)
+                if (isDashing)
                 {
-                    gameObject.layer = 14;
-                    dashTime -= Time.deltaTime;
-                    if (dashTime <= 0)
+                    if (!canWallJump)
                     {
-                        gameObject.layer = 7;
-                        playerRb2D.gravityScale = startGravity;
-                        dashTime = startDashTime;
+                        gameObject.layer = 14;
+                        dashTime -= Time.deltaTime;
+                        if (dashTime <= 0)
+                        {
+                            gameObject.layer = 7;
+                            playerRb2D.gravityScale = startGravity;
+                            dashTime = startDashTime;
+                            isDashing = false;
+                        }
+                    }
+                    else
+                    {
                         isDashing = false;
                     }
                 }
@@ -446,7 +453,7 @@ public class NinjaController : MonoBehaviour
         {
             if (transform.GetChild(2).gameObject.layer == 10)
             {
-                if (collision.gameObject.layer != 0 && collision.gameObject.layer != 7 && collision.gameObject.layer != 9 && collision.gameObject.layer != 10 && collision.gameObject.layer != 15 && collision.gameObject.layer != 17)
+                if (collision.gameObject.layer == 11)
                 {
                     if (canReturn)
                     {
@@ -475,7 +482,7 @@ public class NinjaController : MonoBehaviour
             isOnGround = true;
         }
 
-        if (collision.collider.gameObject.layer == 6 && isOnGround == false && fromGroundWall == false)
+        if (collision.GetContact(0).normal.y <= 0.5 && collision.collider.gameObject.layer == 6 && isOnGround == false && fromGroundWall == false)
         {
             dashCount = maxDashCount;
             playerRb2D.gravityScale = 0.2f;

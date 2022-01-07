@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 
     public static Vector2 spawnPlayer;
 
+    public static int checkpoint;
+
     public bool isStatic;
     private bool isPaused = false;
     private bool cannotPause = false;
@@ -48,6 +50,7 @@ public class GameManager : MonoBehaviour
             player = GameObject.Find("Player");
 
             player.transform.position = spawnPlayer;
+            checkpointManagerScript.checkpoint = checkpoint;
         }
     }
 
@@ -83,6 +86,7 @@ public class GameManager : MonoBehaviour
             checkpointManagerScript = GameObject.Find("CheckpointManager").GetComponent<CheckpointManager>();
 
             spawnPlayer = checkpointManagerScript.spawnPoint;
+            checkpoint = checkpointManagerScript.checkpoint;
         }
         else
         {

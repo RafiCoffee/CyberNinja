@@ -91,13 +91,13 @@ public class BossBehaviour : MonoBehaviour
                 switch (comportamientos)
                 {
                     case 0:
-                        bossAudio.PlayOneShot(cabezazoClip, 1f);
+                        bossAudio.PlayOneShot(cabezazoClip, 0.35f);
                         bossAnim.Play("cabezazo2");
                         StartCoroutine(Cabezazo());
                         break;
 
                     case 1:
-                        bossAudio.PlayOneShot(pisotonClip, 1f);
+                        bossAudio.PlayOneShot(pisotonClip, 0.35f);
                         bossAnim.Play("pisoton");
                         StartCoroutine(Pisoton());
                         break;
@@ -133,7 +133,7 @@ public class BossBehaviour : MonoBehaviour
 
             if (escudo <= 0)
             {
-                bossAudio.PlayOneShot(shieldQuit, 1f);
+                bossAudio.PlayOneShot(shieldQuit, 0.5f);
                 timer.Stop();
                 invencible = false;
                 shieldAnim.SetTrigger("Quit");
@@ -191,7 +191,7 @@ public class BossBehaviour : MonoBehaviour
 
     void Shoot()
     {
-        bossAudio.PlayOneShot(bulletClip, 1f);
+        bossAudio.PlayOneShot(bulletClip, 0.35f);
         bullet = bulletPoolScript.GetPooledObject();
         bullet.transform.position = cañon.transform.position;
         bullet.transform.rotation = cañon.transform.rotation;
@@ -256,9 +256,9 @@ public class BossBehaviour : MonoBehaviour
 
     IEnumerator Laser()
     {
-        bossAudio.PlayOneShot(chargeBeam, 1f);
+        bossAudio.PlayOneShot(chargeBeam, 0.3f);
         yield return new WaitForSeconds(1f);
-        bossAudio.PlayOneShot(beam, 1f);
+        bossAudio.PlayOneShot(beam, 0.3f);
         Lasersito.Play();
         yield return new WaitForSeconds(0.6f);
         Lasersito.Stop();

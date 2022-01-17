@@ -354,6 +354,8 @@ public class NinjaController : MonoBehaviour
     {
         if (canMoveInGame)
         {
+            playerRb2D.velocity = new Vector2(movement.x, playerRb2D.velocity.y);
+
             if (jump && isOnGround)
             {
                 jump = false;
@@ -365,8 +367,6 @@ public class NinjaController : MonoBehaviour
                 dash = false;
                 Dash();
             }
-
-                playerRb2D.velocity = new Vector2(movement.x, playerRb2D.velocity.y);
         }
         else
         {
